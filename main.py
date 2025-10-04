@@ -90,22 +90,34 @@ def home():
 # Dining Page
 @app.route('/dining')
 def dining():
-    return render_template('dining.html')
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    user = User.query.get(session['user_id'])
+    return render_template('dining.html', username=user.username)
 
 # Calender Page
 @app.route('/calender')
 def calender():
-    return render_template('calender.html')
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    user = User.query.get(session['user_id'])
+    return render_template('calender.html', username=user.username)
 
 # Quizes Page
 @app.route('/quizzes')
 def quizes():
-    return render_template('quizzes.html')
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    user = User.query.get(session['user_id'])
+    return render_template('quizzes.html', username=user.username)
 
 # About Page
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    user = User.query.get(session['user_id'])
+    return render_template('about.html', username=user.username)
 
 # Signout Functionality
 @app.route('/signout')
