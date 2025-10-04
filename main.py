@@ -117,15 +117,14 @@ def calendar():
         title = request.form.get('title')
         description = request.form.get('description')
         date_str = request.form.get('date')
-        hour = int(request.form.get('hour', 0))
-        minute = int(request.form.get('minute', 0))
+        time_str = request.form.get('time')
 
-        if not title or not date_str:
+        if not title or not date_str or not time_str:
             # could pass error message back to template
             return redirect(url_for('calendar'))
 
-        event_date = datetime.fromisoformat(date_str)
-        event_date = event_date.replace(hour=hour, minute=minute)
+        datetime_str = f"{date_str}T{time_str}"
+        event_date = datetime.fromisoformat(datetime_str)
 
         new_event = Event(
             title=title,
