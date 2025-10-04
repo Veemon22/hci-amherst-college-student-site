@@ -1,6 +1,8 @@
 # Imports List
 from datetime import datetime
+from datetime import date
 from flask import Flask
+from flask import jsonify
 from flask import render_template
 from flask import redirect
 from flask import url_for
@@ -11,6 +13,7 @@ from models import Event
 from models import User
 from models import QuizResult
 
+import calendar as Calendar
 import os
 import random
 
@@ -36,7 +39,7 @@ with app.app_context():
 
 # Sign Up Page
 @app.route('/')
-@app.route('/signin')
+@app.route('/signin', methods=['GET'])
 def signin():
     #Redirect to home if already signed in
     if 'user_id' in session:
@@ -79,6 +82,12 @@ def existing_user():
     else:
         return render_template('signin.html', user_not_found=True)
 
+# Signout Functionality
+@app.route('/signout')
+def signout():
+    session.pop('user_id', None)
+    return redirect(url_for('signin'))
+
 # Home Page
 @app.route('/home')
 def home():
@@ -95,17 +104,59 @@ def dining():
     user = User.query.get(session['user_id'])
     return render_template('dining.html', username=user.username)
 
-# Calender Page
-@app.route('/calender')
-def calender():
+# Calendar Page
+@app.route('/calendar', methods=['GET', 'POST'])
+def calendar():
     if 'user_id' not in session:
         return redirect(url_for('signin'))
-    user = User.query.get(session['user_id'])
-    return render_template('calender.html', username=user.username)
 
+    user = User.query.get(session['user_id'])
+
+    # Handle form submission
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        date_str = request.form.get('date')
+        hour = int(request.form.get('hour', 0))
+        minute = int(request.form.get('minute', 0))
+
+        if not title or not date_str:
+            # could pass error message back to template
+            return redirect(url_for('calendar'))
+
+        event_date = datetime.fromisoformat(date_str)
+        event_date = event_date.replace(hour=hour, minute=minute)
+
+        new_event = Event(
+            title=title,
+            description=description,
+            date=event_date,
+            user_id=user.id
+        )
+        db.session.add(new_event)
+        db.session.commit()
+        return redirect(url_for('calendar_page'))
+
+    # Build calendar for current month
+    now = datetime.now()
+    cal = Calendar.Calendar(firstweekday=6)  # Sunday start
+    month_days = cal.monthdayscalendar(now.year, now.month)  # full month
+
+    # Get user's events for current month
+    events = Event.query.filter_by(user_id=user.id).all()
+
+    return render_template(
+        'calendar.html',
+        username=user.username,
+        calendar_data=month_days,
+        current_day=now.day,
+        current_month=now.month,
+        current_year=now.year,
+        events=events
+    )
 # Quizes Page
 @app.route('/quizzes')
-def quizes():
+def quizzes():
     if 'user_id' not in session:
         return redirect(url_for('signin'))
     user = User.query.get(session['user_id'])
@@ -119,8 +170,3 @@ def about():
     user = User.query.get(session['user_id'])
     return render_template('about.html', username=user.username)
 
-# Signout Functionality
-@app.route('/signout')
-def signout():
-    session.pop('user_id', None)
-    return redirect(url_for('signin'))

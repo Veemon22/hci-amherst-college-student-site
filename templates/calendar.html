@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Calendar - Amherst College Student{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Your Calendar</h1>
+<p>Welcome, {{ username }}! Here is your personalized calendar.</p>
+
+<div id="calendar-container">
+    <table class="calendar-table">
+        <thead>
+            <tr>
+                <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+                <th>Thu</th><th>Fri</th><th>Sat</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in calendar_data %}
+            <tr>
+                {% for day in week %}
+                {% if day == 0 %}
+                    <td></td>
+                {% else %}
+                    {% set today_class = 'today' if day == current_day else '' %}
+                    <td class="{{ today_class }}">
+                        <div class="day-number">{{ day }}</div>
+                        {% for event in events %}
+                            {% if event.date.day == day and event.date.month == current_month %}
+                                <div class="event">{{ event.title }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button id="toggle-add-event">Add Event</button>
+    <div id="add-event-form-container" class="hidden">
+        <form action="{{ url_for('calendar') }}" method="post">
+            <label>Title:</label>
+            <input type="text" name="title" required>
+            <label>Description:</label>
+            <input type="text" name="description">
+            <label>Date:</label>
+            <input type="date" name="date" required>
+            <label>Hour:</label>
+            <input type="number" name="hour" min="0" max="23" required>
+            <label>Minute:</label>
+            <input type="number" name="minute" min="0" max="59" required>
+            <button type="submit">Add Event</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,45 @@
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.calendar-table th, .calendar-table td {
+    border: 1px solid #ccc;
+    width: 14.28%;
+    height: 100px;
+    vertical-align: top;
+    padding: 5px;
+}
+
+.today {
+    background-color: #5e2a8c;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.event {
+    background-color: #d1b3ff;
+    margin: 2px 0;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+.hidden {
+    display: none;
+}
+
+#toggle-add-event {
+    margin: 10px 0;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#add-event-form-container {
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f4f4f4;
+}
