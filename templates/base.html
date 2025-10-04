@@ -9,15 +9,18 @@
 </head>
 <body>
 
-    <header class="top-nav">
-        <nav class="nav-links">
-            <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('dining') }}">Dining</a></li>
-            <li><a href="{{ url_for('calender') }}">Calender</a></li>
-            <li><a href="{{ url_for('quizes') }}">Quizes</a></li>
-            <li><a href="{{ url_for('about') }}">About</a></li>
+    <div class="top-nav">
+        <img src=" {{ url_for('static', filename='images/2022_1101_Fall-Scenics_129.jpg') }}">
+        <nav class="nav-link-bar">
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('dining') }}">Dining</a></li>
+                <li><a href="{{ url_for('calender') }}">Calender</a></li>
+                <li><a href="{{ url_for('quizes') }}">Quizes</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+            </ul>
         </nav>
-    </header>
+    </div>
 
     <main>
         {% block content %}

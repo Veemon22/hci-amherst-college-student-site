@@ -1,12 +1,28 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
+{% endblock %}
+
 {% block title %}About - Amherst College Student{% endblock %}
 
 {% block content %}
-    <h1>About This Site</h1>
-    <p>This site is dedicated to providing information and resources for Amherst College students. Our goal is to enhance the student experience by offering valuable insights, tips, and updates relevant to campus life.</p>
-    <h2>Our Mission</h2>
-    <p>We aim to create a supportive online community where students can find the information they need to succeed academically and socially at Amherst College.</p>
-    <h2>Contact Us</h2>
-    <p>If you have any questions or suggestions, please feel free to reach out through our contact page.</p>
+<div class="about-page">
+    <h2>About This Site</h2>
+    <p>
+        Welcome! This website was created for my Human-Computer Interaction class. The goal is to explore user interactions, design aesthetics, and overall usability.
+    </p>
+    <p>
+        I’m looking for feedback on anything you notice—whether it’s the layout, design, navigation, or general user experience. Your input is invaluable in helping me improve the site.
+    </p>
+    <p>
+        If you have suggestions or comments, please share them using <a href="#">this feedback link</a>.
+    </p>
+    <p>
+        If you want to contact me directly, you can reach me at <a href="mailto:aleon26@amherst.edu">aleon26@amherst.edu</a>.
+    </p>
+    <p>
+        Thank you for visiting, and enjoy exploring the site!
+    </p>
+</div>
 {% endblock %}
