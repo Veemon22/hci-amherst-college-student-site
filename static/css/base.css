@@ -79,6 +79,16 @@ footer {
     bottom: 0;
 }
 
+a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 .top-nav {
     align-items: center;
     justify-content: space-between;
@@ -95,20 +105,51 @@ footer {
     object-fit: cover;
 }
 
+.username-menu {
+    position: relative;
+    cursor: pointer;
+}
+
+.username-menu-toggle{
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+.username-menu-toggle:hover {
+    background-color: #4b216b;
+}
+
+.username-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    color: #000000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    list-style: none;
+    z-index: 1000;
+}
+
+.username-dropdown li a {
+    color: #5e2a8c;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.username-dropdown li a:hover {
+    background-color: #f0e6fa;
+}
+
+.username-dropdown.show {
+    display: block;
+}
+
 .nav-links {
     display: flex;
     gap: 20px;
     list-style: none;
     justify-content: center;
-}
-
-
-a {
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
 }

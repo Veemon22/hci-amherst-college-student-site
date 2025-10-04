@@ -4,6 +4,7 @@ from flask import Flask
 from flask import render_template
 from flask import redirect
 from flask import url_for
+from flask import request
 from flask import session
 from models import db
 from models import Event
@@ -37,17 +38,24 @@ with app.app_context():
 @app.route('/')
 @app.route('/signin')
 def signin():
-    # Redirect to home if already logged in
+    #Redirect to home if already signed in
     if 'user_id' in session:
         return redirect(url_for('home'))
     
+    return render_template('signin.html', user_not_found=False)
+
+@app.route('/new_user', methods=['POST'])
+def new_user():
+    # Pulls all users in DB
+    existing_usernames = [u.username for u in User.query.all()]
+
     # Generate a unique username
     while True:
         adjective = random.choice(adjectives)
         animal = random.choice(animals)
-        username = f"{adjective}{animal}"
-        existing_user = User.query.filter_by(username=username).first()
-        if not existing_user:    
+        number = random.randint(1, 99)
+        username = f"{adjective}{animal}{number}"
+        if username not in existing_usernames:    
             break
     
     # Create new user in DB
@@ -58,12 +66,26 @@ def signin():
     # Store ID in session
     session['user_id'] = new_user.id
 
-    return render_template('signin.html', username=new_user.username)
+    return redirect(url_for('home'))
+
+#Sigin In Existing User
+@app.route('/existing_user', methods=['POST'])
+def existing_user():
+    username =  request.form.get('username')
+    user = User.query.filter_by(username=username).first()
+    if user:
+        session['user_id'] = user.id
+        return redirect(url_for('home'))
+    else:
+        return render_template('signin.html', user_not_found=True)
 
 # Home Page
 @app.route('/home')
 def home():
-    return render_template('home.html')
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    user = User.query.get(session['user_id'])
+    return render_template('home.html', username=user.username)
 
 # Dining Page
 @app.route('/dining')
@@ -84,3 +106,9 @@ def quizes():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+# Signout Functionality
+@app.route('/signout')
+def signout():
+    session.pop('user_id', None)
+    return redirect(url_for('signin'))

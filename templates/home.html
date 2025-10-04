@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
 {% block title %}Home - Amherst College Student{% endblock %}
 
 {% block content %}
-    <h1>Welcome to the Amherst College Student Site</h1>
+<div class="home-page">
+    <h1>Welcome back, <div class="username">{{ username }}</div></h1>
     <p>This is the home page.</p>
+</div>
 {% endblock %}

@@ -9,11 +9,23 @@
 </head>
 <body class="signin-page">
     <div class="signin-container">
-        <h1>Welcome To The Site</h1>
-        <p>Here is your anonymous username</p>
-        <h2 class="username">{{ username }}</h2>
-        <p>This name helps us to save your interactions with the site so don't forget it!</p>
-        <a href="{{ url_for('home') }}" class="continue-button">Continue to Home Page</a>
+        <h1>Sign In</h1>
+        <form action="{{ url_for('existing_user') }}" method="post">
+            <label for="username">Username:</label>
+            <input type="text" name="username" required>
+            <button type="submit">Sign In</button>
+        </form>
+        <div class="error-popup" id="error-popup"><p>User not found!</p></div>
+
+        <hr>
+        <form action="{{ url_for('new_user') }}" method="post">
+            <button type="submit">New User</button>
+        </form>
     </div>
+    <script src="{{ url_for('static', filename='js/signin.js') }}"></script>
+    <script>
+        const userNotFound = {{ 'true' if user_not_found else 'false' }};
+        showPopup(userNotFound);
+    </script>
 </body>
 </html>
