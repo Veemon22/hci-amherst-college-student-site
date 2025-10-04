@@ -5,15 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Amherst College Student{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 </head>
 <body>
 
-    <header>
-        <nav>
+    <header class="top-nav">
+        <nav class="nav-links">
             <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('about') }}">About</a></li>
             <li><a href="{{ url_for('dining') }}">Dining</a></li>
+            <li><a href="{{ url_for('calender') }}">Calender</a></li>
+            <li><a href="{{ url_for('quizes') }}">Quizes</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
         </nav>
     </header>
 
