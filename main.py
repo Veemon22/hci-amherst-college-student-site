@@ -135,24 +135,40 @@ def calendar():
         )
         db.session.add(new_event)
         db.session.commit()
-        return redirect(url_for('calendar_page'))
+        return redirect(url_for('calendar'))
 
     # Build calendar for current month
     now = datetime.now()
-    cal = Calendar.Calendar(firstweekday=6)  # Sunday start
-    month_days = cal.monthdayscalendar(now.year, now.month)  # full month
+    month = int(request.args.get('month', now.month))
+    year = int(request.args.get('year', now.year))
 
-    # Get user's events for current month
-    events = Event.query.filter_by(user_id=user.id).all()
+    cal = Calendar.Calendar(firstweekday=6)  # Sunday start
+    month_days = cal.monthdayscalendar(year, month)  # full month
+
+    # Get user's events for this month
+    events = Event.query.filter(
+        Event.user_id == user.id,
+        Event.date.between(datetime(year, 1, 1), datetime(year, 12, 31))
+    ).all()
+
+    # Calculate previous and next month/year for navigation
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
 
     return render_template(
         'calendar.html',
         username=user.username,
         calendar_data=month_days,
-        current_day=now.day,
-        current_month=now.month,
-        current_year=now.year,
-        events=events
+        current_day=now.day if (month == now.month and year == now.year) else 0,
+        current_month=month,
+        current_year=year,
+        events=events,
+        prev_month=prev_month,
+        prev_year=prev_year,
+        next_month=next_month,
+        next_year=next_year
     )
 # Quizes Page
 @app.route('/quizzes')

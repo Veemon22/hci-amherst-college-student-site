@@ -10,6 +10,12 @@
 <h1>Your Calendar</h1>
 <p>Welcome, {{ username }}! Here is your personalized calendar.</p>
 
+<div class="calendar-header">
+    <a href="{{ url_for('calendar', month=prev_month, year=prev_year) }}" class="calendar-nav-btn">&lt; Prev</a>
+    <h2>{{ current_month }}/{{ current_year }}</h2>
+    <a href="{{ url_for('calendar', month=next_month, year=next_year) }}" class="calendar-nav-btn">Next &gt;</a>
+</div>
+
 <div id="calendar-container">
     <table class="calendar-table">
         <thead>
@@ -22,19 +28,19 @@
             {% for week in calendar_data %}
             <tr>
                 {% for day in week %}
-                {% if day == 0 %}
-                    <td></td>
-                {% else %}
-                    {% set today_class = 'today' if day == current_day else '' %}
-                    <td class="{{ today_class }}">
-                        <div class="day-number">{{ day }}</div>
-                        {% for event in events %}
-                            {% if event.date.day == day and event.date.month == current_month %}
-                                <div class="event">{{ event.title }}</div>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                {% endif %}
+                    {% if day == 0 %}
+                        <td class="empty-day"></td>
+                    {% else %}
+                        {% set today_class = 'today' if day == current_day else '' %}
+                        <td class="{{ today_class }}">
+                            <div class="day-number">{{ day }}</div>
+                            {% for event in events %}
+                                {% if event.date.day == day and event.date.month == current_month %}
+                                    <div class="event">{{ event.title }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    {% endif %}
                 {% endfor %}
             </tr>
             {% endfor %}
