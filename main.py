@@ -11,7 +11,7 @@ from flask import session
 from models import db
 from models import Event
 from models import User
-from models import QuizResult
+from quiz_data import quizzes
 
 import calendar as Calendar
 import os
@@ -170,12 +170,25 @@ def calendar():
         next_year=next_year
     )
 # Quizes Page
-@app.route('/quizzes')
-def quizzes():
+@app.route("/quizzes")
+def quizzes_page():
     if 'user_id' not in session:
         return redirect(url_for('signin'))
     user = User.query.get(session['user_id'])
-    return render_template('quizzes.html', username=user.username)
+    return render_template("quizzes.html", username=user.username, quizzes=quizzes)
+
+
+@app.route("/quiz/<quiz_id>")
+def quiz_page(quiz_id):
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    user = User.query.get(session['user_id'])
+    quiz = quizzes.get(quiz_id)
+
+    if not quiz:
+        return "Quiz not found", 404
+
+    return render_template("quiz.html", username=user.username, quiz=quiz)
 
 # About Page
 @app.route('/about')
