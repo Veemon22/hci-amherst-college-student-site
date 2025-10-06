@@ -1,14 +1,55 @@
 {% extends "base.html" %}
+{% block title %}Home - Amherst College Student{% endblock %}
 
 {% block extra_css %}
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 {% endblock %}
 
-{% block title %}Home - Amherst College Student{% endblock %}
-
 {% block content %}
-<div class="home-page">
-    <h1>Welcome back, <div class="username">{{ username }}</div></h1>
-    <p>This is the home page.</p>
+<div class="home-container">
+    <h1 id="greeting" data-username="{{ username }}">Welcome!</h1>
+    <p class="intro">Here’s what’s happening around Amherst today — pick what you’d like to explore:</p>
+
+    <div class="feature-grid">
+
+        <a href="{{ url_for('calendar') }}" class="feature-card">
+            <div class="icon-circle">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <h2>Calendar</h2>
+            <p>Keep track of your classes, events, and more.</p>
+        </a>
+
+        <a href="{{ url_for('dining') }}" class="feature-card">
+            <div class="icon-circle">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <h2>Dining</h2>
+            <p>Check out what’s on the menu today at Valentine Dining Hall.</p>
+        </a>
+
+        <a href="{{ url_for('quizzes_page') }}" class="feature-card">
+            <div class="icon-circle">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <h2>Quizzes</h2>
+            <p>Test your Amherst knowledge or find your ideal study spot!</p>
+        </a>
+
+        <a href="{{ url_for('about') }}" class="feature-card">
+            <div class="icon-circle">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h2>About</h2>
+            <p>Learn more about the Amherst College Student Portal project.</p>
+        </a>
+
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

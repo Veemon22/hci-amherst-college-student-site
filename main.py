@@ -56,7 +56,7 @@ def new_user():
     while True:
         adjective = random.choice(adjectives)
         animal = random.choice(animals)
-        number = random.randint(1, 99)
+        number = random.randint(1, 999)
         username = f"{adjective}{animal}{number}"
         if username not in existing_usernames:    
             break
