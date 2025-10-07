@@ -1,8 +1,15 @@
 .home-container {
-    max-width: 900px;
-    margin: 40px auto;
+    width: 100vw; 
+    max-width: 1000px;
+    margin: 40px auto; 
+    padding: 60px 20px;
+    box-sizing: border-box;
     text-align: center;
-    color: #333;
+}
+
+.home-container > .home-inner {
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .home-container h1 {
@@ -12,18 +19,18 @@
 
 .intro {
     font-size: 1.1rem;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     color: #555;
 }
 
-/* Grid layout */
 .feature-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
+    width: 100%;
+    justify-items: center;
 }
 
-/* Feature cards */
 .feature-card {
     background: #fff;
     border-radius: 12px;
@@ -35,11 +42,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 280px;
 }
 
 .feature-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    text-decoration: none;
 }
 
 .icon-circle {
@@ -64,4 +73,8 @@
 .feature-card p {
     font-size: 0.95rem;
     color: #555;
+}
+
+.feature-card i{
+    text-decoration: none;
 }

@@ -12,8 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             timeGreeting = "Good evening";
         }
-
-        // If the username is stored in a data attribute (recommended)
         const username = greetingEl.getAttribute("data-username") || "";
         greetingEl.textContent = `${timeGreeting}${username ? ", " + username : ""}!`;
     }
