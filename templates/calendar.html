@@ -53,21 +53,29 @@
         </tbody>
     </table>
 
-    <button id="toggle-add-event">Add Event</button>
-    <div id="add-event-form-container" class="hidden">
-        <form action="{{ url_for('calendar') }}" method="post">
-            <label>Title:</label>
-            <input type="text" name="title" required>
-            <label>Description:</label>
-            <input type="text" name="description">
-            <label>Date:</label>
-            <input type="date" name="date" required>
-            <label>Time:</label>
-            <input type="time" name="time" step="60" required>
-            <button type="submit">Add Event</button>
-        </form>
+    <!-- Button to open Add Event Modal -->
+    <button id="open-add-event-modal">Add Event</button>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-add-event-modal" class="close-btn">&times;</span>
+            <h3>Add New Event</h3>
+            <form action="{{ url_for('calendar') }}" method="post" id="add-event-form">
+                <label>Title:</label>
+                <input type="text" name="title" required>
+                <label>Description:</label>
+                <input type="text" name="description">
+                <label>Date:</label>
+                <input type="date" name="date" required>
+                <label>Time:</label>
+                <input type="time" name="time" step="60" required>
+                <button type="submit" class="submit-btn">Add Event</button>
+            </form>
+        </div>
     </div>
 
+    <!-- Event Details Modal -->
     <div id="eventModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
