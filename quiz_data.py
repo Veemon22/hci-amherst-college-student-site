@@ -113,36 +113,133 @@ quizzes = {
         ]
     },
     "study_spot": {
-        "title": "Where Should You Study Today?",
-        "description": "Find the perfect campus spot for your study vibes!",
-        "image": "images/where_to_study_quiz.jpg",
-        "questions": [
-            {
-                "question": "Do you prefer quiet or background noise?",
-                "image": "images/questions/quiet_or_noise.jpg",
-                "options": [
-                    {"text": "Quiet", "points": 2},
-                    {"text": "Background noise", "points": 1},
-                    {"text": "Depends", "points": 3},
-                    {"text": "Outdoor sounds", "points": 0}
-                ]
-            },
-            {
-                "question": "Do you like studying alone or with friends?",
-                "image": "images/questions/study_alone_or_friends.jpg",
-                "options": [
-                    {"text": "Alone", "points": 2},
-                    {"text": "With friends", "points": 1},
-                    {"text": "Both", "points": 3},
-                    {"text": "Neither", "points": 0}
-                ]
-            }
-        ],
-        "results": [
-            {"min_points": 0, "max_points": 2, "text": "Try the library for focus."},
-            {"min_points": 3, "max_points": 4, "text": "A quiet lounge might be best."},
-            {"min_points": 5, "max_points": 6, "text": "Outdoor seating is perfect today!"},
-            {"min_points": 7, "max_points": 10, "text": "Any spot works for your vibes today!"}
-        ]
-    }
+    "title": "Where Should You Study Today?",
+    "description": "Find the perfect campus spot for your study vibes!",
+    "image": "images/where_to_study_quiz.jpg",
+    "questions": [
+        {
+            "question": "Do you prefer quiet or background noise?",
+            "image": "images/where_to_study_quiz_1.jpg",
+            "options": [
+                {"text": "Quiet", "points": 3},
+                {"text": "Background noise", "points": 2},
+                {"text": "Depends", "points": 1},
+                {"text": "Outdoor sounds", "points": 0}
+            ]
+        },
+        {
+            "question": "Do you like studying alone or with friends?",
+            "image": "images/where_to_study_quiz_2.jpg",
+            "options": [
+                {"text": "Alone", "points": 3},
+                {"text": "With friends", "points": 1},
+                {"text": "Both", "points": 2},
+                {"text": "Neither", "points": 0}
+            ]
+        },
+        {
+            "question": "What time of day do you study best?",
+            "image": "images/where_to_study_quiz_3.jpg",
+            "options": [
+                {"text": "Morning", "points": 3},
+                {"text": "Afternoon", "points": 2},
+                {"text": "Evening", "points": 1},
+                {"text": "Late night", "points": 0}
+            ]
+        },
+        {
+            "question": "What type of seating do you prefer?",
+            "image": "images/where_to_study_quiz_4.png",
+            "options": [
+                {"text": "Comfy chair", "points": 2},
+                {"text": "Hard chair", "points": 3},
+                {"text": "Standing desk", "points": 1},
+                {"text": "Bean bag", "points": 0}
+            ]
+        },
+        {
+            "question": "How important is access to food or coffee?",
+            "image": "images/where_to_study_quiz_5.JPG",
+            "options": [
+                {"text": "Essential — I need my caffeine!", "points": 2},
+                {"text": "Nice to have nearby", "points": 1},
+                {"text": "I can survive without", "points": 3},
+                {"text": "I prefer snacks in my bag", "points": 0}
+            ]
+        },
+        {
+            "question": "What’s your ideal lighting for studying?",
+            "image": "images/where_to_study_quiz_6.jpg",
+            "options": [
+                {"text": "Bright natural light", "points": 2},
+                {"text": "Soft cozy lighting", "points": 1},
+                {"text": "Fluorescent lab light", "points": 3},
+                {"text": "Whatever’s available", "points": 0}
+            ]
+        },
+        {
+            "question": "Do you like being around other people studying?",
+            "image": "images/where_to_study_quiz_7.jpg",
+            "options": [
+                {"text": "Yes, it motivates me", "points": 2},
+                {"text": "Only if they’re quiet", "points": 3},
+                {"text": "Not really", "points": 0},
+                {"text": "Sometimes", "points": 1}
+            ]
+        },
+        {
+            "question": "What’s your go-to study break?",
+            "image": "images/where_to_study_quiz_8.jpg",
+            "options": [
+                {"text": "Walk around campus", "points": 0},
+                {"text": "Grab a coffee", "points": 2},
+                {"text": "Chat with friends", "points": 1},
+                {"text": "Power nap", "points": 3}
+            ]
+        },
+        {
+            "question": "How do you feel about group projects?",
+            "image": "images/where_to_study_quiz_9.jpg",
+            "options": [
+                {"text": "Love them!", "points": 1},
+                {"text": "They’re okay", "points": 2},
+                {"text": "Only if I can lead", "points": 3},
+                {"text": "Please no", "points": 0}
+            ]
+        },
+        {
+            "question": "What’s your favorite campus vibe?",
+            "image": "images/where_to_study_quiz_10.jpg",
+            "options": [
+                {"text": "Historic and classic", "points": 3},
+                {"text": "Modern and open", "points": 2},
+                {"text": "Chill and social", "points": 1},
+                {"text": "Nature and sunshine ", "points": 0}
+            ]
+        }
+    ],
+    "results": [
+        {
+            "min_points": 0,
+            "max_points": 8,
+            "text": "🏞️ **First-Year Quad** — You’re happiest under the trees with sunlight and laughter around you. Grab a blanket, soak in the campus vibes, and study outdoors!"
+        },
+        {
+            "min_points": 9,
+            "max_points": 14,
+            "text": "☕ **Frost Café** — You like to stay productive with a latte nearby. The background hum of conversation keeps you focused but not lonely."
+        },
+        {
+            "min_points": 15,
+            "max_points": 21,
+            "text": "🔬 **Science Center Atrium** — Bright, airy, and structured, just like your study habits. You love that mix of focus and movement."
+        },
+        {
+            "min_points": 22,
+            "max_points": 30,
+            "text": "📚 **Frost Library 3rd Floor** — You’re all about calm and deep concentration. Find your favorite carrel, silence your phone, and power through your work."
+        }
+    ]
+}
+
 }
