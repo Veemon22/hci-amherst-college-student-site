@@ -1,20 +1,16 @@
 let currentQuestion = 0;
 let totalPoints = 0;
 
-// Show initial question
 document.getElementById('progress').classList.remove('hidden');
 loadQuestion(currentQuestion);
 
 function loadQuestion(index) {
     const question = quizData.questions[index];
 
-    // Update progress
     document.getElementById('current-question').textContent = index + 1;
 
-    // Question text
     document.getElementById('question-text').textContent = question.question;
 
-    // Question image
     const qImage = document.getElementById('question-image');
     if (question.image) {
         qImage.src = `/static/${question.image}`;
@@ -23,9 +19,8 @@ function loadQuestion(index) {
         qImage.classList.add('hidden');
     }
 
-    // Options
     const optionsContainer = document.getElementById('options-container');
-    optionsContainer.innerHTML = ''; // clear previous
+    optionsContainer.innerHTML = ''; 
     question.options.forEach(option => {
         const btn = document.createElement('button');
         btn.textContent = option.text;
@@ -47,15 +42,12 @@ function handleAnswer(points) {
 }
 
 function showResult() {
-    // Hide question section
     document.getElementById('question-section').classList.add('hidden');
     document.getElementById('progress').classList.add('hidden');
 
-    // Show result section
     const resultContainer = document.getElementById('result-container');
     resultContainer.classList.remove('hidden');
 
-    // Determine result based on points
     let result;
     for (let r of quizData.results) {
         if (totalPoints >= r.min_points && totalPoints <= r.max_points) {
@@ -66,7 +58,6 @@ function showResult() {
 
     document.getElementById('result-title').textContent = result.text;
 
-    // Optional: result image if included
     const rImage = document.getElementById('result-image');
     if (result.image) {
         rImage.src = `/static/${result.image}`;

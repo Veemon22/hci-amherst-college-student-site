@@ -1,4 +1,3 @@
-/* === Sign In Page Styles === */
 body.signin-page {
     font-family: "Tiempos", serif;
     background-color: #f4f4f4;
@@ -61,7 +60,6 @@ button:hover {
     background-color: #4b216b;
 }
 
-/* === Error Popup === */
 .error-popup {
     display: none;
     color: red;

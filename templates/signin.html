@@ -11,21 +11,18 @@
     <div class="signin-container">
         <h1>Sign In</h1>
 
-        <!-- Existing user form -->
         <form action="{{ url_for('existing_user') }}" method="post">
             <label for="username">Username:</label>
             <input type="text" name="username" required>
             <button type="submit">Sign In</button>
         </form>
 
-        <!-- Popup for errors -->
         <div class="error-popup" id="error-popup">
             <p>User not found!</p>
         </div>
 
         <hr>
 
-        <!-- New user form -->
         <form action="{{ url_for('new_user') }}" method="post">
             <button type="submit">New User</button>
         </form>
@@ -33,7 +30,6 @@
 
     <script src="{{ url_for('static', filename='js/signin.js') }}"></script>
     <script>
-        // Trigger popup if server says user not found
         const userNotFound = {{ 'true' if user_not_found else 'false' }};
         if (userNotFound) showPopup();
     </script>
