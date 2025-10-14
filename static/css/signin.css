@@ -1,18 +1,86 @@
+/* === Sign In Page Styles === */
+body.signin-page {
+    font-family: "Tiempos", serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
 .signin-container {
     max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    justify-content: center;
+    width: 90%;
+    padding: 30px;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    color: #5e2a8c;
+    margin-bottom: 20px;
+}
+
+form {
+    width: 100%;
     display: flex;
     flex-direction: column;
 }
 
-.error-popup{
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input[type="text"] {
+    padding: 8px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+button {
+    padding: 10px;
+    background-color: #5e2a8c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #4b216b;
+}
+
+/* === Error Popup === */
+.error-popup {
     display: none;
-    position: absolute;
     color: red;
-    font-size: 12px;
+    font-weight: bold;
+    margin-top: -5px;
+    margin-bottom: 15px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.error-popup.show {
+    display: block;
+    opacity: 1;
+}
+
+hr {
+    width: 100%;
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid #ccc;
 }

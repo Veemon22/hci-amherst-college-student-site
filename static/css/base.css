@@ -1,3 +1,45 @@
+/* Tiempos */
+@font-face{
+    font-family: "Tiempos";
+    src: url('../fonts/TestTiemposText-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: "Tiempos";
+    src: url("../fonts/TestTiemposText-Bold.otf") format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: "Tiempos";
+    src: url("../fonts/TestTiemposText-Italic.otf") format('opentype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Setimo */
+@font-face {
+    font-family: "Setimo";
+    src: url("../fonts/Setimo.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Setimo";
+    src: url(../fonts/Setimo_Bold.otf) format("opentype");
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Setimo";
+    src: url(../fonts/Setimo_Italic.otf) format("opentype");
+    font-weight: normal;
+    font-style: italic;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -6,6 +48,11 @@ html, body {
     background-color: #f4f4f4;
     overflow-x: hidden; 
 }
+
+h1, button {
+    font-family: "Setimo", sans-serif;
+}
+
 
 body {
     display: flex;
