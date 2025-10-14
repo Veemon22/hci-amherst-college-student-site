@@ -1,4 +1,3 @@
-/* Tiempos */
 @font-face{
     font-family: "Tiempos";
     src: url('../fonts/TestTiemposText-Regular.otf') format('opentype');
@@ -20,7 +19,6 @@
     font-style: italic;
 }
 
-/* Setimo */
 @font-face {
     font-family: "Setimo";
     src: url("../fonts/Setimo.otf") format("opentype");

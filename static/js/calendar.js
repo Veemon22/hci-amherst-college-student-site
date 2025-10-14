@@ -1,4 +1,3 @@
-// === Show "Add Event" Modal ===
 document.addEventListener("DOMContentLoaded", () => {
     const openAddEventBtn = document.getElementById("open-add-event-modal");
     const addEventModal = document.getElementById("addEventModal");
@@ -16,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Optional: Close when clicking outside modal content
     window.addEventListener("click", (e) => {
         if (e.target === addEventModal) {
             addEventModal.classList.add("hidden");
@@ -24,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// === Show Event Details Modal ===
 function showEventModal(element) {
     const title = element.getAttribute("data-title");
     const time = element.getAttribute("data-time");
@@ -37,7 +34,6 @@ function showEventModal(element) {
     document.getElementById("eventModal").classList.remove("hidden");
 }
 
-// === Close Event Details Modal ===
 function closeModal() {
     document.getElementById("eventModal").classList.add("hidden");
 }

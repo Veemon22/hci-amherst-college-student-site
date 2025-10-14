@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", function() {
         dropdown.classList.toggle("show");
     });
 
-    // Optional: close dropdown if clicking outside
     window.addEventListener("click", function(e) {
         if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.remove("show");
