@@ -120,7 +120,6 @@ def calendar():
         time_str = request.form.get('time')
 
         if not title or not date_str or not time_str:
-            # could pass error message back to template
             return redirect(url_for('calendar'))
 
         datetime_str = f"{date_str}T{time_str}"
