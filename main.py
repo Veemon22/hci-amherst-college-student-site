@@ -48,7 +48,8 @@ def get_current_user():
 @app.route('/signin', methods=['GET'])
 def signin():
     #Redirect to home if already signed in
-    if 'user_id' in session:
+    user = get_current_user()
+    if user:
         return redirect(url_for('home'))
     
     return render_template('signin.html', user_not_found=False)
@@ -101,24 +102,25 @@ def home():
     if not user:
         session.pop('user_id', None)
         return redirect(url_for('signin'))
-    user = User.query.get(session['user_id'])
     return render_template('home.html', username=user.username)
 
 # Dining Page
 @app.route('/dining')
 def dining():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
+        session.pop('user_id', None)
         return redirect(url_for('signin'))
-    user = User.query.get(session['user_id'])
     return render_template('dining.html', username=user.username)
 
 # Calendar Page
 @app.route('/calendar', methods=['GET', 'POST'])
 def calendar():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
+        session.pop('user_id', None)
         return redirect(url_for('signin'))
 
-    user = User.query.get(session['user_id'])
 
     # Handle form submission
     if request.method == 'POST':
@@ -179,17 +181,19 @@ def calendar():
 # Quizes Page
 @app.route("/quizzes")
 def quizzes_page():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
+        session.pop('user_id', None)
         return redirect(url_for('signin'))
-    user = User.query.get(session['user_id'])
     return render_template("quizzes.html", username=user.username, quizzes=quizzes)
 
 
 @app.route("/quiz/<quiz_id>")
 def quiz_page(quiz_id):
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
+        session.pop('user_id', None)
         return redirect(url_for('signin'))
-    user = User.query.get(session['user_id'])
     quiz = quizzes.get(quiz_id)
 
     if not quiz:
@@ -200,9 +204,10 @@ def quiz_page(quiz_id):
 # About Page
 @app.route('/about')
 def about():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
+        session.pop('user_id', None)
         return redirect(url_for('signin'))
-    user = User.query.get(session['user_id'])
     return render_template('about.html', username=user.username)
 
 if __name__ == '__main__':
