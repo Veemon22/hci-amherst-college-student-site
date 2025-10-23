@@ -37,6 +37,12 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+def get_current_user():
+    user_id = session.get('user_id')
+    if not user_id:
+        return None
+    return User.query.get(user_id)
+
 # Sign Up Page
 @app.route('/')
 @app.route('/signin', methods=['GET'])
@@ -91,7 +97,9 @@ def signout():
 # Home Page
 @app.route('/home')
 def home():
-    if 'user_id' not in session:
+    user = get_current_user()
+    if not user:
+        session.pop('user_id', None)
         return redirect(url_for('signin'))
     user = User.query.get(session['user_id'])
     return render_template('home.html', username=user.username)
