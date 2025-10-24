@@ -15,6 +15,11 @@ body.signin-page {
     align-items: center;
 }
 
+.new-user-note {
+    font-size: 12px;
+    text-align: center;
+}
+
 h1 {
     color: #5e2a8c;
     margin-bottom: 20px;
