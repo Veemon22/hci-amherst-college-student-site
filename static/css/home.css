@@ -1,8 +1,6 @@
 .home-container {
-    width: 100vw; 
     max-width: 1000px;
     margin: 40px auto; 
-    padding: 60px 60px;
     box-sizing: border-box;
     text-align: center;
 }
