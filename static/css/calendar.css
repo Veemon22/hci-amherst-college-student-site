@@ -12,6 +12,38 @@
     box-sizing: border-box;
 }
 
+.calendar-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.calendar-btn {
+    background-color: #5e2a8c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.calendar-btn:hover {
+    background-color: #4b216b;
+    transform: translateY(-2px);
+}
+
+.gcal-connected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    color: green;
+}
+
 .calendar-header {
     display: flex;
     justify-content: space-between;

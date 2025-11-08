@@ -1,6 +1,7 @@
 # Imports List
 from datetime import datetime
-from datetime import date
+from dateutil import parser
+from dotenv import load_dotenv
 from flask import Flask
 from flask import jsonify
 from flask import render_template
@@ -8,12 +9,16 @@ from flask import redirect
 from flask import url_for
 from flask import request
 from flask import session
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
 from models import db
 from models import Event
 from models import User
 from quiz_data import quizzes
 
 import calendar as Calendar
+import json
 import os
 import random
 
@@ -22,6 +27,11 @@ app.secret_key = "supersecretkey"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+load_dotenv()
+cred_json = os.getenv('GOOGLE_CREDENTIALS')
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # For development only
 
 adjectives = [
     "Adventurous", "Brave", "Curious", "Diligent", "Energetic",
@@ -121,45 +131,79 @@ def calendar():
         session.pop('user_id', None)
         return redirect(url_for('signin'))
 
-
-    # Handle form submission
-    if request.method == 'POST':
+    # -------------------------
+    # Handle Guest Event Form
+    # -------------------------
+    if request.method == 'POST' and request.form.get('action') == 'add_guest_event':
         title = request.form.get('title')
         description = request.form.get('description')
         date_str = request.form.get('date')
         time_str = request.form.get('time')
 
-        if not title or not date_str or not time_str:
-            return redirect(url_for('calendar'))
+        if title and date_str and time_str:
+            datetime_str = f"{date_str}T{time_str}"
+            event_date = datetime.fromisoformat(datetime_str)
 
-        datetime_str = f"{date_str}T{time_str}"
-        event_date = datetime.fromisoformat(datetime_str)
-
-        new_event = Event(
-            title=title,
-            description=description,
-            date=event_date,
-            user_id=user.id
-        )
-        db.session.add(new_event)
-        db.session.commit()
+            new_event = Event(
+                title=title,
+                description=description,
+                date=event_date,
+                user_id=user.id
+            )
+            db.session.add(new_event)
+            db.session.commit()
         return redirect(url_for('calendar'))
 
-    # Build calendar for current month
+    # -------------------------
+    # Fetch Guest Events
+    # -------------------------
     now = datetime.now()
     month = int(request.args.get('month', now.month))
     year = int(request.args.get('year', now.year))
 
     cal = Calendar.Calendar(firstweekday=6)  # Sunday start
-    month_days = cal.monthdayscalendar(year, month)  # full month
+    month_days = cal.monthdayscalendar(year, month)
 
-    # Get user's events for this month
-    events = Event.query.filter(
+    guest_events = Event.query.filter(
         Event.user_id == user.id,
         Event.date.between(datetime(year, 1, 1), datetime(year, 12, 31))
     ).all()
 
-    # Calculate previous and next month/year for navigation
+    # ------------------------
+    # Fetch Google Calendar Events
+    # -------------------------
+    gcal_events = []
+    if 'gcal_credentials' in session:
+        creds_data = session['gcal_credentials']
+        creds = Credentials(**creds_data)
+        service = build('calendar', 'v3', credentials=creds)
+
+        now_utc = datetime.utcnow().isoformat() + 'Z'
+        events_result = service.events().list(
+            calendarId='primary',
+            maxResults=30,
+            singleEvents=True,
+            orderBy='startTime',
+            timeMin=now_utc
+        ).execute()
+        gcal_events_raw = events_result.get('items', [])
+
+        # Convert Google event start times to datetime objects
+        for e in gcal_events_raw:
+            start_str = e.get('start', {}).get('dateTime') or e.get('start', {}).get('date')
+            if start_str:
+                try:
+                    e['start_dt'] = parser.isoparse(start_str)
+                except Exception:
+                    e['start_dt'] = None
+            else:
+                e['start_dt'] = None
+
+        gcal_events = gcal_events_raw
+
+    # -------------------------
+    # Month Navigation
+    # -------------------------
     prev_month = month - 1 if month > 1 else 12
     prev_year = year if month > 1 else year - 1
     next_month = month + 1 if month < 12 else 1
@@ -172,12 +216,52 @@ def calendar():
         current_day=now.day if (month == now.month and year == now.year) else 0,
         current_month=month,
         current_year=year,
-        events=events,
+        guest_events=guest_events,
+        gcal_events=gcal_events,
         prev_month=prev_month,
         prev_year=prev_year,
         next_month=next_month,
         next_year=next_year
     )
+
+# Authorization route
+@app.route('/authorize_gcal')
+def authorize_gcal():
+    flow = Flow.from_client_config(
+        json.loads(cred_json),
+        scopes=['https://www.googleapis.com/auth/calendar'],
+        redirect_uri=os.getenv('GOOGLE_REDIRECT_URI')
+    )
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true',
+        prompt='consent'
+    )
+    session['oauth_state'] = state
+    return redirect(authorization_url)
+
+# OAuth2 callback route
+@app.route('/oauth2callback')
+def oauth2callback():
+    flow = Flow.from_client_config(
+        json.loads(cred_json),
+        scopes=['https://www.googleapis.com/auth/calendar'],
+        redirect_uri=os.getenv('GOOGLE_REDIRECT_URI')
+    )
+    flow.fetch_token(authorization_response=request.url)
+    credentials = flow.credentials
+
+    session['gcal_credentials'] = {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes
+    }
+
+    return redirect(url_for('calendar'))
+
 # Quizes Page
 @app.route("/quizzes")
 def quizzes_page():
