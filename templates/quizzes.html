@@ -11,7 +11,7 @@
 
 <div class="quiz-list">
     {% for quiz_id, quiz_info in quizzes.items() %}
-    <a href="{{ url_for('quiz_page', quiz_id=quiz_id) }}" class="quiz-card">
+    <a href="{{ url_for('quizzes.quiz_page', quiz_id=quiz_id) }}" class="quiz-card">
         <img src="{{ url_for('static', filename=quiz_info.image) }}" alt="{{ quiz_info.title }}">
         <div class="quiz-card-text">
             <h2>{{ quiz_info.title }}</h2>

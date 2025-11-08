@@ -1,4 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session
+from flask import Blueprint
+from flask import render_template
+from flask import redirect 
+from flask import url_for
+from flask import request
+from flask import session
 from models import db, User, Event
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials

@@ -1,5 +1,6 @@
 # Imports List
 from blueprints.calendar import calendar_bp
+from blueprints.quizzes import quiz_bp
 from datetime import datetime
 from dateutil import parser
 from dotenv import load_dotenv
@@ -25,6 +26,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.register_blueprint(calendar_bp)
+app.register_blueprint(quiz_bp)
 
 load_dotenv()
 cred_json = os.getenv('GOOGLE_CREDENTIALS')
@@ -120,29 +122,6 @@ def dining():
         session.pop('user_id', None)
         return redirect(url_for('signin'))
     return render_template('dining.html', username=user.username)
-
-# Quizes Page
-@app.route("/quizzes")
-def quizzes_page():
-    user = get_current_user()
-    if not user:
-        session.pop('user_id', None)
-        return redirect(url_for('signin'))
-    return render_template("quizzes.html", username=user.username, quizzes=quizzes)
-
-
-@app.route("/quiz/<quiz_id>")
-def quiz_page(quiz_id):
-    user = get_current_user()
-    if not user:
-        session.pop('user_id', None)
-        return redirect(url_for('signin'))
-    quiz = quizzes.get(quiz_id)
-
-    if not quiz:
-        return "Quiz not found", 404
-
-    return render_template("quiz.html", username=user.username, quiz=quiz)
 
 # About Page
 @app.route('/about')
