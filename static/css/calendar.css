@@ -8,8 +8,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 300px);
-    box-sizing: border-box;
+    min-height: 1000px;
 }
 
 .calendar-actions {
@@ -82,7 +81,7 @@
     width: 14.28%;
     vertical-align: top;
     padding: 5px;
-    height: calc((100vh - 420px) / 6);
+    height: calc(100% / 6);
     position: relative;
     box-sizing: border-box;
 }

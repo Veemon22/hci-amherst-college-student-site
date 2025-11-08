@@ -13,3 +13,4 @@ class Event(db.Model):
     description = db.Column(db.Text, nullable=True)
     date = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    gcal_id = db.Column(db.String(225), nullable=True)  # To store Google Calendar event ID

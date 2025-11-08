@@ -25,7 +25,16 @@
                     Refresh Google Events
                 </button>
             </form>
+            <form action="{{ url_for('disconnect_gcal') }}" method="get" style="display:inline;">
+                <button type="submit" class="calendar-btn disconnect-btn">
+                    Disconnect Google Calendar
+                </button>
+            </form>
+            <button id="open-sync-all-modal" class="calendar-btn sync-all-btn">
+                Sync All Guest Events to Google Calendar
+            </button>
         </div>
+</form>
     {% endif %}
 </div>
 
@@ -61,7 +70,7 @@
                                         data-description="{{ event.description or 'No description provided.' }}"
                                         data-time="{{ event.date.strftime('%I:%M %p') }}"
                                         onclick="showEventModal(this)">
-                                        {{ event.title }}
+                                        {{ event.date.strftime('%I:%M %p') }} - {{ event.title }}
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -75,7 +84,7 @@
                                         data-description="{{ event.description or 'No description provided.' }}"
                                         data-time="{{ event_date.strftime('%I:%M %p') }}"
                                         onclick="showEventModal(this)">
-                                        {{ event.summary }}
+                                        {{ event_date.strftime('%I:%M %p') }} - {{ event.summary }}
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -103,6 +112,13 @@
                 <input type="date" name="date" required>
                 <label>Time:</label>
                 <input type="time" name="time" step="60" required>
+
+                {% if session.get('gcal_credentials') %}
+                <label>
+                    <input type="checkbox" name="sync_to_gcal">
+                    Also add to Google Calendar
+                </label>
+                {% endif %}
                 <button type="submit" class="submit-btn">Add Event</button>
             </form>
         </div>
@@ -117,6 +133,23 @@
             <p id="modal-description"></p>
         </div>
     </div>
+
+        <!-- Sync Confirmation Modal -->
+    <div id="syncConfirmModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-sync-modal" class="close-btn">&times;</span>
+            <h3>Sync Guest Events</h3>
+            <p>This will add all your guest events to your Google Calendar.</p>
+            <p>Do you want to continue?</p>
+            <div class="modal-buttons">
+                <form action="{{ url_for('sync_all_to_gcal') }}" method="post" style="display:inline;">
+                    <button type="submit" class="submit-btn confirm-btn">Yes, Sync All</button>
+                </form>
+                <button id="cancel-sync-btn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
 
 </div>
 {% endblock %}

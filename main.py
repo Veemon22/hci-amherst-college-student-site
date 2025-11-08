@@ -139,11 +139,13 @@ def calendar():
         description = request.form.get('description')
         date_str = request.form.get('date')
         time_str = request.form.get('time')
+        sync_to_gcal = request.form.get('sync_to_gcal')
 
         if title and date_str and time_str:
             datetime_str = f"{date_str}T{time_str}"
             event_date = datetime.fromisoformat(datetime_str)
 
+            # Save locally first
             new_event = Event(
                 title=title,
                 description=description,
@@ -152,10 +154,40 @@ def calendar():
             )
             db.session.add(new_event)
             db.session.commit()
+
+            # If syncing to Google Calendar
+            if sync_to_gcal and 'gcal_credentials' in session:
+                creds_data = session['gcal_credentials']
+                creds = Credentials(**creds_data)
+                service = build('calendar', 'v3', credentials=creds)
+
+                gcal_event = {
+                    'summary': title,
+                    'description': description,
+                    'start': {'dateTime': event_date.isoformat(), 'timeZone': 'America/New_York'},
+                    'end': {'dateTime': (event_date).isoformat(), 'timeZone': 'America/New_York'}
+                }
+
+                created_event = service.events().insert(calendarId='primary', body=gcal_event).execute()
+
+                # Save the Google Calendar event ID to local DB
+                new_event.gcal_id = created_event.get('id')
+                db.session.commit()
+
+                # Update stored credentials if token refreshed
+                session['gcal_credentials'] = {
+                    'token': creds.token,
+                    'refresh_token': creds.refresh_token,
+                    'token_uri': creds.token_uri,
+                    'client_id': creds.client_id,
+                    'client_secret': creds.client_secret,
+                    'scopes': creds.scopes
+                }
+
         return redirect(url_for('calendar'))
 
     # -------------------------
-    # Fetch Guest Events
+    # Fetch Local (Guest) Events
     # -------------------------
     now = datetime.now()
     month = int(request.args.get('month', now.month))
@@ -169,10 +201,9 @@ def calendar():
         Event.date.between(datetime(year, 1, 1), datetime(year, 12, 31))
     ).all()
 
-    # ------------------------
+    # -------------------------
     # Fetch Google Calendar Events
     # -------------------------
-    gcal_events = []
     if 'gcal_credentials' in session:
         creds_data = session['gcal_credentials']
         creds = Credentials(**creds_data)
@@ -181,15 +212,31 @@ def calendar():
         now_utc = datetime.utcnow().isoformat() + 'Z'
         events_result = service.events().list(
             calendarId='primary',
-            maxResults=30,
+            maxResults=50,
             singleEvents=True,
             orderBy='startTime',
             timeMin=now_utc
         ).execute()
         gcal_events_raw = events_result.get('items', [])
 
+        # Build a set of current Google Calendar IDs
+        current_gcal_ids = {e['id'] for e in gcal_events_raw}
+
+        # Clear gcal_id from local guest events if deleted in GCal
+        for e in guest_events:
+            if e.gcal_id and e.gcal_id not in current_gcal_ids:
+                e.gcal_id = None
+        db.session.commit()
+
+        # Filter out Google Calendar events that are already linked to local guest events
+        linked_gcal_ids = {e.gcal_id for e in guest_events if e.gcal_id}
+        filtered_gcal_events = [
+            e for e in gcal_events_raw
+            if e.get('id') not in linked_gcal_ids
+        ]
+
         # Convert Google event start times to datetime objects
-        for e in gcal_events_raw:
+        for e in filtered_gcal_events:
             start_str = e.get('start', {}).get('dateTime') or e.get('start', {}).get('date')
             if start_str:
                 try:
@@ -199,7 +246,7 @@ def calendar():
             else:
                 e['start_dt'] = None
 
-        gcal_events = gcal_events_raw
+        gcal_events = filtered_gcal_events
 
     # -------------------------
     # Month Navigation
@@ -209,6 +256,9 @@ def calendar():
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1
 
+    # -------------------------
+    # Render Page
+    # -------------------------
     return render_template(
         'calendar.html',
         username=user.username,
@@ -258,6 +308,54 @@ def oauth2callback():
         'client_id': credentials.client_id,
         'client_secret': credentials.client_secret,
         'scopes': credentials.scopes
+    }
+
+    return redirect(url_for('calendar'))
+
+@app.route('/disconnect_gcal')
+def disconnect_gcal():
+    session.pop('gcal_credentials', None)
+    return redirect(url_for('calendar'))
+
+@app.route('/sync_all_to_gcal', methods=['POST'])
+def sync_all_to_gcal():
+    user = get_current_user()
+    if not user or 'gcal_credentials' not in session:
+        return redirect(url_for('calendar'))
+
+    creds_data = session['gcal_credentials']
+    creds = Credentials(**creds_data)
+    service = build('calendar', 'v3', credentials=creds)
+
+    # Fetch all guest events for this user that have not been synced yet
+    unsynced_events = Event.query.filter_by(user_id=user.id, gcal_id=None).all()
+
+    for event in unsynced_events:
+        try:
+            gcal_event = {
+                'summary': event.title,
+                'description': event.description,
+                'start': {'dateTime': event.date.isoformat(), 'timeZone': 'America/New_York'},
+                'end': {'dateTime': event.date.isoformat(), 'timeZone': 'America/New_York'}
+            }
+
+            created_event = service.events().insert(calendarId='primary', body=gcal_event).execute()
+
+            # Store the Google Calendar event ID in the local DB
+            event.gcal_id = created_event.get('id')
+            db.session.commit()
+
+        except Exception as e:
+            print(f"Error syncing event '{event.title}': {e}")
+
+    # Update credentials in case the token was refreshed
+    session['gcal_credentials'] = {
+        'token': creds.token,
+        'refresh_token': creds.refresh_token,
+        'token_uri': creds.token_uri,
+        'client_id': creds.client_id,
+        'client_secret': creds.client_secret,
+        'scopes': creds.scopes
     }
 
     return redirect(url_for('calendar'))

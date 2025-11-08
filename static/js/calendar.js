@@ -20,6 +20,37 @@ document.addEventListener("DOMContentLoaded", () => {
             addEventModal.classList.add("hidden");
         }
     });
+
+    // --- Sync Confirmation Modal ---
+    const syncModal = document.getElementById("syncConfirmModal");
+    const openSyncBtn = document.getElementById("open-sync-all-modal");
+    const closeSyncBtn = document.getElementById("close-sync-modal");
+    const cancelSyncBtn = document.getElementById("cancel-sync-btn");
+
+    if (openSyncBtn && syncModal) {
+        openSyncBtn.addEventListener("click", () => {
+            syncModal.classList.remove("hidden");
+        });
+    }
+
+    if (closeSyncBtn) {
+        closeSyncBtn.addEventListener("click", () => {
+            syncModal.classList.add("hidden");
+        });
+    }
+
+    if (cancelSyncBtn) {
+        cancelSyncBtn.addEventListener("click", () => {
+            syncModal.classList.add("hidden");
+        });
+    }
+
+    // Close modal if clicking outside of it
+    window.addEventListener("click", (e) => {
+        if (e.target === syncModal) {
+            syncModal.classList.add("hidden");
+        }
+    });
 });
 
 function showEventModal(element) {
