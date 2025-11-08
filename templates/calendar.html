@@ -66,6 +66,8 @@
                             {% for event in guest_events %}
                                 {% if event.date.day == day and event.date.month == current_month %}
                                     <div class="event guest-event"
+                                        data-id="{{ event.id }}"
+                                        data-gcal-id="{{ event.gcal_id or '' }}"
                                         data-title="{{ event.title }}"
                                         data-description="{{ event.description or 'No description provided.' }}"
                                         data-time="{{ event.date.strftime('%I:%M %p') }}"
@@ -80,6 +82,7 @@
                                 {% set event_date = event.start_dt %}
                                 {% if event_date.day == day and event_date.month == current_month %}
                                     <div class="event"
+                                        data-gcal-id="{{ event.get('id') }}"
                                         data-title="{{ event.summary }}"
                                         data-description="{{ event.description or 'No description provided.' }}"
                                         data-time="{{ event_date.strftime('%I:%M %p') }}"
@@ -131,6 +134,12 @@
             <p><strong>Time:</strong> <span id="modal-time"></span></p>
             <p><strong>Description:</strong></p>
             <p id="modal-description"></p>
+
+            <input type="hidden" id="modal-event-id">
+            <input type="hidden" id="modal-gcal-id">
+
+            <!-- Delete button -->
+            <button id="delete-event-btn" class="submit-btn">Delete Event</button>
         </div>
     </div>
 
@@ -149,6 +158,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-delete-modal" class="close-btn">&times;</span>
+            <h3>Delete Event</h3>
+            <p id="delete-confirm-text">Are you sure you want to delete this event?</p>
+            <div class="modal-buttons">
+                <form id="delete-event-form" action="{{ url_for('delete_event') }}" method="post" style="display:inline;">
+                    <input type="hidden" name="event_id" id="delete-event-id">
+                    <input type="hidden" name="gcal_id" id="delete-gcal-id">
+                    <button type="submit" class="submit-btn confirm-btn">Yes, Delete</button>
+                </form>
+                <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
 
 
 </div>

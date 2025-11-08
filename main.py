@@ -360,6 +360,43 @@ def sync_all_to_gcal():
 
     return redirect(url_for('calendar'))
 
+@app.route('/delete_event', methods=['POST'])
+def delete_event():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    event_id = request.form.get('event_id')
+    gcal_id = request.form.get('gcal_id')
+
+    # Delete local guest event
+    if event_id:
+        event = Event.query.filter_by(id=event_id, user_id=user.id).first()
+        if event:
+            # If it has a GCal ID, also delete from GCal
+            if gcal_id and 'gcal_credentials' in session:
+                creds_data = session['gcal_credentials']
+                creds = Credentials(**creds_data)
+                service = build('calendar', 'v3', credentials=creds)
+                try:
+                    service.events().delete(calendarId='primary', eventId=gcal_id).execute()
+                except Exception as e:
+                    print(f"Error deleting GCal event: {e}")
+            db.session.delete(event)
+            db.session.commit()
+
+    # Delete standalone GCal event (not in local DB)
+    elif gcal_id and 'gcal_credentials' in session:
+        creds_data = session['gcal_credentials']
+        creds = Credentials(**creds_data)
+        service = build('calendar', 'v3', credentials=creds)
+        try:
+            service.events().delete(calendarId='primary', eventId=gcal_id).execute()
+        except Exception as e:
+            print(f"Error deleting GCal event: {e}")
+
+    return redirect(url_for('calendar'))
+
 # Quizes Page
 @app.route("/quizzes")
 def quizzes_page():
