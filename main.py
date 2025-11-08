@@ -204,6 +204,7 @@ def calendar():
     # -------------------------
     # Fetch Google Calendar Events
     # -------------------------
+    gcal_events = []
     if 'gcal_credentials' in session:
         creds_data = session['gcal_credentials']
         creds = Credentials(**creds_data)
@@ -359,6 +360,132 @@ def sync_all_to_gcal():
     }
 
     return redirect(url_for('calendar'))
+
+@app.route('/edit_event', methods=['POST'])
+def edit_event():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    event_id = request.form.get('event_id')
+    gcal_id = request.form.get('gcal_id')
+    new_title = request.form.get('title')
+    new_time = request.form.get('time')  # in "HH:MM" 24-hour format
+    new_description = request.form.get('description')
+
+    if not (event_id or gcal_id):
+        return redirect(url_for('calendar'))
+
+    # Update local guest event if it exists
+    if event_id:
+        event = Event.query.filter_by(id=event_id, user_id=user.id).first()
+        if event:
+            # Update time
+            if new_time:
+                # Combine existing date with new time
+                event_date = event.date
+                hours, minutes = map(int, new_time.split(":"))
+                event.date = event_date.replace(hour=hours, minute=minutes)
+            
+            # Update title & description
+            if new_title:
+                event.title = new_title
+            if new_description:
+                event.description = new_description
+
+            db.session.commit()
+
+    # Update Google Calendar event if it exists and credentials are present
+    if gcal_id and 'gcal_credentials' in session:
+        creds_data = session['gcal_credentials']
+        creds = Credentials(**creds_data)
+        service = build('calendar', 'v3', credentials=creds)
+
+        # Prepare updated GCal event data
+        gcal_event = {}
+        if new_title:
+            gcal_event['summary'] = new_title
+        if new_description:
+            gcal_event['description'] = new_description
+        if new_time and event_id:  # only if we have local event date to combine
+            event_date = Event.query.get(event_id).date
+            start_dt = event_date.isoformat()
+            end_dt = event_date.isoformat()  # adjust if your events have duration
+            gcal_event['start'] = {'dateTime': start_dt, 'timeZone': 'America/New_York'}
+            gcal_event['end'] = {'dateTime': end_dt, 'timeZone': 'America/New_York'}
+
+        if gcal_event:
+            try:
+                service.events().patch(calendarId='primary', eventId=gcal_id, body=gcal_event).execute()
+            except Exception as e:
+                print(f"Error updating GCal event: {e}")
+
+        # Update credentials if token refreshed
+        session['gcal_credentials'] = {
+            'token': creds.token,
+            'refresh_token': creds.refresh_token,
+            'token_uri': creds.token_uri,
+            'client_id': creds.client_id,
+            'client_secret': creds.client_secret,
+            'scopes': creds.scopes
+        }
+
+    return redirect(url_for('calendar'))
+
+@app.route('/import_gcal_to_db', methods=['POST'])
+def import_gcal_to_db():
+    user = get_current_user()
+    if not user or 'gcal_credentials' not in session:
+        return redirect(url_for('calendar'))
+
+    creds_data = session['gcal_credentials']
+    creds = Credentials(**creds_data)
+    service = build('calendar', 'v3', credentials=creds)
+
+    # Pull all upcoming events (or you can adjust time range)
+    now_utc = datetime.utcnow().isoformat() + 'Z'
+    events_result = service.events().list(
+        calendarId='primary',
+        maxResults=250,  # adjust as needed
+        singleEvents=True,
+        orderBy='startTime',
+        timeMin=now_utc
+    ).execute()
+
+    gcal_events_raw = events_result.get('items', [])
+
+    # Pull existing gcal IDs for this user
+    existing_gcal_ids = {e.gcal_id for e in Event.query.filter_by(user_id=user.id).all() if e.gcal_id}
+
+    added_count = 0
+    for e in gcal_events_raw:
+        gcal_id = e.get('id')
+        if gcal_id in existing_gcal_ids:
+            continue  # skip duplicates
+
+        start_str = e.get('start', {}).get('dateTime') or e.get('start', {}).get('date')
+        if not start_str:
+            continue
+        try:
+            start_dt = parser.isoparse(start_str)
+        except Exception:
+            continue
+
+        new_event = Event(
+            title=e.get('summary', 'No Title'),
+            description=e.get('description', ''),
+            date=start_dt,
+            user_id=user.id,
+            gcal_id=gcal_id
+        )
+        db.session.add(new_event)
+        added_count += 1
+
+    db.session.commit()
+
+    print(f"Added {added_count} events to the database.")
+    return redirect(url_for('calendar'))
+
 
 @app.route('/delete_event', methods=['POST'])
 def delete_event():

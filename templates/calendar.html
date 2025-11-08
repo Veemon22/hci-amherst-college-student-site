@@ -33,8 +33,11 @@
             <button id="open-sync-all-modal" class="calendar-btn sync-all-btn">
                 Sync All Guest Events to Google Calendar
             </button>
+            <button id="open-import-gcal-modal" class="calendar-btn import-btn">
+                Import Google Calendar Events
+            </button>
+
         </div>
-</form>
     {% endif %}
 </div>
 
@@ -130,16 +133,20 @@
     <div id="eventModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h3 id="modal-title"></h3>
-            <p><strong>Time:</strong> <span id="modal-time"></span></p>
-            <p><strong>Description:</strong></p>
-            <p id="modal-description"></p>
+            <label><strong>Title:</strong></label>
+            <input type="text" id="modal-title-input">
+            <label><strong>Time:</strong></label>
+            <input type="time" id="modal-time-input">
+            <label><strong>Description:</strong></label>
+            <textarea id="modal-description-input"></textarea>
 
             <input type="hidden" id="modal-event-id">
             <input type="hidden" id="modal-gcal-id">
 
-            <!-- Delete button -->
-            <button id="delete-event-btn" class="submit-btn">Delete Event</button>
+            <div class="modal-buttons">
+                <button id="save-event-btn" class="submit-btn">Save Changes</button>
+                <button id="delete-event-btn" class="submit-btn">Delete Event</button>
+            </div>
         </div>
     </div>
 
@@ -176,7 +183,21 @@
         </div>
     </div>
 
-
+    <!-- Import Google Calendar Events Modal -->
+    <div id="importGcalModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-import-modal" class="close-btn">&times;</span>
+            <h3>Import Google Calendar Events</h3>
+            <p>This will import all your Google Calendar events into the local calendar database.</p>
+            <p>Do you want to continue?</p>
+            <div class="modal-buttons">
+                <form action="{{ url_for('import_gcal_to_db') }}" method="post" style="display:inline;">
+                    <button type="submit" class="submit-btn confirm-btn">Yes, Import All</button>
+                </form>
+                <button id="cancel-import-btn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
 
 </div>
 {% endblock %}
