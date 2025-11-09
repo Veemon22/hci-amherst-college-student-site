@@ -13,7 +13,6 @@ from flask import request
 from flask import session
 from models import db
 from models import User
-from quiz_data import quizzes
 
 import json
 import os
@@ -24,6 +23,9 @@ app.secret_key = "supersecretkey"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'quiz_images')
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 
 
 app.register_blueprint(calendar_bp)
 app.register_blueprint(quiz_bp)

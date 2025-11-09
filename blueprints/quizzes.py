@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, redirect, session, url_for, request
+import os
+from flask import Blueprint, render_template, redirect, session, url_for, request, current_app, flash, abort
+from werkzeug.utils import secure_filename
 from models import db, User, Quiz, Question, Option, QuizResultRange
 
 quiz_bp = Blueprint('quizzes', __name__, template_folder='../templates')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def get_current_user():
     user_id = session.get('user_id')
@@ -9,7 +12,35 @@ def get_current_user():
         return None
     return User.query.get(user_id)
 
-# List quizzes
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_image(file):
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        folder = os.path.join(current_app.root_path, 'static', 'uploads', 'quiz_images')
+        os.makedirs(folder, exist_ok=True)
+        filepath = os.path.join(folder, filename)
+        file.save(filepath)
+        return f'uploads/quiz_images/{filename}'
+    return None
+
+def can_publish(quiz):
+    """Helper to determine if a quiz is valid for publishing"""
+    if not quiz.questions or not quiz.results:
+        return False
+    for q in quiz.questions:
+        if len(q.options) < 2 or len(q.options) > 4:
+            return False
+        if quiz.quiz_type == "objective" and not any(o.is_correct for o in q.options):
+            return False
+    ranges = [(r.min_points, r.max_points) for r in quiz.results]
+    ranges.sort()
+    for i in range(len(ranges)-1):
+        if ranges[i][1] >= ranges[i+1][0]:
+            return False
+    return True
+
 @quiz_bp.route('/quizzes')
 def quizzes_page():
     user = get_current_user()
@@ -23,39 +54,96 @@ def quizzes_page():
         "quizzes.html",
         username=user.username,
         published_quizzes=published_quizzes,
-        user_quizzes=user_quizzes
+        user_quizzes=user_quizzes,
+        can_publish=can_publish
     )
 
-# Create a new quiz
+# -- Create / Edit Quiz Helper --
+def save_questions_and_results(quiz):
+    seen_question_ids = set()
+    question_idx = 0
+
+    while f"question_text_{question_idx}" in request.form:
+        q_text = request.form.get(f"question_text_{question_idx}")
+        if not q_text.strip():
+            question_idx += 1
+            continue
+
+        q_id = request.form.get(f"question_id_{question_idx}")
+        question = Question.query.get(int(q_id)) if q_id else Question(quiz_id=quiz.id)
+        question.text = q_text
+
+        # Image
+        q_file = request.files.get(f"question_image_{question_idx}")
+        if q_file:
+            q_image_path = save_image(q_file)
+            if q_image_path:
+                question.image = q_image_path
+
+        db.session.add(question)
+        db.session.flush()
+        seen_question_ids.add(question.id)
+
+        # Remove old options
+        Option.query.filter_by(question_id=question.id).delete()
+
+        option_texts = request.form.getlist(f"option_text_{question_idx}[]")
+        option_points = request.form.getlist(f"option_points_{question_idx}[]")
+        option_correct = request.form.getlist(f"option_correct_{question_idx}[]")
+
+        for i, text in enumerate(option_texts):
+            if not text.strip():
+                continue
+            points = int(option_points[i]) if option_points[i] else 0
+            is_correct = "true" in option_correct[i:i+1]
+            db.session.add(Option(text=text, points=points, is_correct=is_correct, question_id=question.id))
+
+        question_idx += 1
+
+    # Remove deleted questions
+    for q in quiz.questions:
+        if q.id not in seen_question_ids:
+            db.session.delete(q)
+
+    # Results
+    QuizResultRange.query.filter_by(quiz_id=quiz.id).delete()
+    mins = request.form.getlist("result_min[]")
+    maxs = request.form.getlist("result_max[]")
+    texts = request.form.getlist("result_text[]")
+
+    for mn, mx, txt in zip(mins, maxs, texts):
+        if txt.strip():
+            db.session.add(QuizResultRange(min_points=int(mn), max_points=int(mx), text=txt, quiz_id=quiz.id))
+
+    db.session.commit()
+
+# -- Create Quiz --
 @quiz_bp.route('/quiz/new', methods=['GET', 'POST'])
 def create_quiz():
     user = get_current_user()
     if not user:
         return redirect(url_for('signin'))
 
-    if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        image = request.form.get('image')
-        quiz_type = request.form.get('quiz_type', 'objective')
+    if request.method == "POST":
+        title = request.form.get("title")
+        description = request.form.get("description")
+        quiz_type = request.form.get("quiz_type", "objective")
+        quiz_file = request.files.get("quiz_image")
+        image_path = save_image(quiz_file) if quiz_file else None
 
-        new_quiz = Quiz(
-            title=title,
-            description=description,
-            image=image,
-            quiz_type=quiz_type,
-            is_published=False,
-            created_by=user.id
-        )
-        db.session.add(new_quiz)
-        db.session.commit()
+        quiz = Quiz(title=title, description=description, quiz_type=quiz_type, created_by=user.id)
+        if image_path:
+            quiz.image = image_path
 
-        save_questions_and_results(new_quiz)
+        db.session.add(quiz)
+        db.session.flush()
+        save_questions_and_results(quiz)
+        flash("Quiz created successfully!", "success")
+        return redirect(url_for("quizzes.edit_quiz", quiz_id=quiz.id))
 
-        return redirect(url_for('quizzes.edit_quiz', quiz_id=new_quiz.id))
+    return render_template("quiz_form.html", quiz=None, username=user.username)
 
-    return render_template("quiz_form.html", username=user.username, quiz=None)
-
+# -- Edit Quiz --
 @quiz_bp.route('/quiz/<int:quiz_id>/edit', methods=['GET', 'POST'])
 def edit_quiz(quiz_id):
     user = get_current_user()
@@ -63,147 +151,26 @@ def edit_quiz(quiz_id):
         return redirect(url_for('signin'))
 
     quiz = Quiz.query.get_or_404(quiz_id)
+    if quiz.created_by != user.id:
+        abort(403)
 
     if request.method == "POST":
-        # Update quiz metadata
         quiz.title = request.form.get("title")
         quiz.description = request.form.get("description")
-        quiz.image = request.form.get("image")
         quiz.quiz_type = request.form.get("quiz_type", "objective")
-        db.session.commit()
+        quiz_file = request.files.get("quiz_image")
+        if quiz_file:
+            image_path = save_image(quiz_file)
+            if image_path:
+                quiz.image = image_path
 
-        # === Questions & Options ===
-
-        # Update existing questions
-        for question in quiz.questions:
-            q_text = request.form.get(f"existing_question_text_{question.id}")
-            q_image = request.form.get(f"existing_question_image_{question.id}")
-            if q_text is not None:
-                question.text = q_text
-                question.image = q_image
-                db.session.commit()
-
-            # Update existing options for this question
-            for option in question.options:
-                o_text = request.form.get(f"existing_option_text_{option.id}")
-                o_points = request.form.get(f"existing_option_points_{option.id}")
-                o_correct = request.form.get(f"existing_option_correct_{option.id}") == "on"
-                if o_text is not None:
-                    option.text = o_text
-                    option.points = int(o_points) if o_points else 0
-                    option.is_correct = o_correct
-                    db.session.commit()
-
-        # Add new questions & options
-        questions_data = request.form.getlist('question_text[]')
-        question_images = request.form.getlist('question_image[]')
-
-        for i, q_text in enumerate(questions_data):
-            if not q_text.strip():
-                continue
-            question = Question(
-                text=q_text,
-                image=question_images[i] if i < len(question_images) else None,
-                quiz_id=quiz.id
-            )
-            db.session.add(question)
-            db.session.flush()  # for question.id
-
-            # Options for new question
-            option_texts = request.form.getlist(f'option_text_{i}[]')
-            option_points = request.form.getlist(f'option_points_{i}[]')
-            option_corrects = request.form.getlist(f'option_correct_{i}[]')
-
-            for j, opt_text in enumerate(option_texts):
-                option = Option(
-                    text=opt_text,
-                    points=int(option_points[j]) if j < len(option_points) else 0,
-                    is_correct=(str(option_corrects[j]).lower() == 'true') if j < len(option_corrects) else False,
-                    quiz_id=quiz.id,
-                    question_id=question.id
-                )
-                db.session.add(option)
-
-        # === Results ===
-
-        # Update existing results
-        for result in quiz.results:
-            r_min = request.form.get(f"existing_result_min_{result.id}")
-            r_max = request.form.get(f"existing_result_max_{result.id}")
-            r_text = request.form.get(f"existing_result_text_{result.id}")
-            if r_min is not None and r_max is not None and r_text is not None:
-                result.min_points = int(r_min)
-                result.max_points = int(r_max)
-                result.text = r_text
-                db.session.commit()
-
-        # Add new results
-        min_points = request.form.getlist('result_min[]')
-        max_points = request.form.getlist('result_max[]')
-        result_texts = request.form.getlist('result_text[]')
-
-        for i, text in enumerate(result_texts):
-            result = QuizResultRange(
-                min_points=int(min_points[i]) if i < len(min_points) else 0,
-                max_points=int(max_points[i]) if i < len(max_points) else 0,
-                text=text,
-                quiz_id=quiz.id
-            )
-            db.session.add(result)
-
-        db.session.commit()
-        return redirect(url_for('quizzes.quizzes_page'))
+        save_questions_and_results(quiz)
+        flash("Quiz updated successfully!", "success")
+        return redirect(url_for("quizzes.quizzes_page"))
 
     return render_template("quiz_form.html", quiz=quiz, username=user.username)
 
-
-
-def save_questions_and_results(quiz):
-    # Save questions and options
-    questions_data = request.form.getlist('question_text[]')
-    question_images = request.form.getlist('question_image[]')
-
-    for i, q_text in enumerate(questions_data):
-        if not q_text.strip():
-            continue
-        question = Question(
-            text=q_text,
-            image=question_images[i] if i < len(question_images) else None,
-            quiz_id=quiz.id
-        )
-        db.session.add(question)
-        db.session.flush()
-
-        option_texts = request.form.getlist(f'option_text_{i}[]')
-        option_points = request.form.getlist(f'option_points_{i}[]')
-        option_corrects = request.form.getlist(f'option_correct_{i}[]')
-
-        for j, opt_text in enumerate(option_texts):
-            option = Option(
-                text=opt_text,
-                points=int(option_points[j]) if j < len(option_points) else 0,
-                is_correct=(str(option_corrects[j]).lower() == 'true') if j < len(option_corrects) else False,
-                question_id=question.id
-            )
-            db.session.add(option)
-
-    # Save result ranges
-    min_points = request.form.getlist('result_min[]')
-    max_points = request.form.getlist('result_max[]')
-    result_texts = request.form.getlist('result_text[]')
-
-    for i, text in enumerate(result_texts):
-        result = QuizResultRange(
-            min_points=int(min_points[i]) if i < len(min_points) else 0,
-            max_points=int(max_points[i]) if i < len(max_points) else 0,
-            text=text,
-            quiz_id=quiz.id
-        )
-        db.session.add(result)
-
-    db.session.commit()
-
-# Delete quiz
+# -- Delete / Publish / Unpublish --
 @quiz_bp.route("/quiz/<int:quiz_id>/delete", methods=["POST"])
 def delete_quiz(quiz_id):
     user = get_current_user()
@@ -211,11 +178,14 @@ def delete_quiz(quiz_id):
         return redirect(url_for('signin'))
 
     quiz = Quiz.query.get_or_404(quiz_id)
+    if quiz.created_by != user.id:
+        abort(403)
+
     db.session.delete(quiz)
     db.session.commit()
+    flash("Quiz deleted successfully!", "success")
     return redirect(url_for('quizzes.quizzes_page'))
 
-# Publish quiz
 @quiz_bp.route("/quiz/<int:quiz_id>/publish", methods=["POST"])
 def publish_quiz(quiz_id):
     user = get_current_user()
@@ -223,6 +193,79 @@ def publish_quiz(quiz_id):
         return redirect(url_for('signin'))
 
     quiz = Quiz.query.get_or_404(quiz_id)
+    if quiz.created_by != user.id:
+        abort(403)
+
+    # Check if the quiz is valid for publishing
+    if not can_publish(quiz):
+        flash("Cannot publish quiz: quiz is invalid. Check questions, options, and result ranges.", "error")
+        return redirect(url_for('quizzes.quizzes_page'))
+
     quiz.is_published = True
     db.session.commit()
+    flash("Quiz published successfully!", "success")
     return redirect(url_for('quizzes.quizzes_page'))
+
+@quiz_bp.route("/quiz/<int:quiz_id>/unpublish", methods=["POST"])
+def unpublish_quiz(quiz_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    if quiz.created_by != user.id:
+        abort(403)
+
+    quiz.is_published = False
+    db.session.commit()
+    flash("Quiz unpublished successfully!", "success")
+    return redirect(url_for('quizzes.quizzes_page'))
+
+# -- Delete Question --
+@quiz_bp.route("/quiz/question/<int:question_id>/delete", methods=["POST"])
+def delete_question(question_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    question = Question.query.get_or_404(question_id)
+    quiz = Quiz.query.get(question.quiz_id)
+    if quiz.created_by != user.id:
+        abort(403)
+
+    db.session.delete(question)
+    db.session.commit()
+    return '', 204  # No content, for fetch JS to handle
+
+# -- Delete Option --
+@quiz_bp.route("/quiz/option/<int:option_id>/delete", methods=["POST"])
+def delete_option(option_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    option = Option.query.get_or_404(option_id)
+    quiz = Quiz.query.get(option.question.quiz_id)
+    if quiz.created_by != user.id:
+        abort(403)
+
+    db.session.delete(option)
+    db.session.commit()
+    return '', 204
+
+# -- Delete Result Range --
+@quiz_bp.route("/quiz/result/<int:result_id>/delete", methods=["POST"])
+def delete_result(result_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    result = QuizResultRange.query.get_or_404(result_id)
+    quiz = Quiz.query.get(result.quiz_id)
+    if quiz.created_by != user.id:
+        abort(403)
+
+    db.session.delete(result)
+    db.session.commit()
+    return '', 204
+

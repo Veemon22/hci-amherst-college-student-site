@@ -1,4 +1,4 @@
-/* Container for the whole form */
+/* Form container */
 #quiz-form {
     max-width: 900px;
     margin: 20px auto;
@@ -8,18 +8,11 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Form headings */
-#quiz-form h1 {
-    text-align: center;
+#quiz-form h1, #quiz-form h2, #quiz-form h3, #quiz-form h4 {
     color: #5e2a8c;
-    margin-bottom: 20px;
 }
 
-/* Input and textarea styling */
-#quiz-form input[type="text"],
-#quiz-form input[type="number"],
-#quiz-form select,
-#quiz-form textarea {
+#quiz-form input[type="text"], #quiz-form input[type="number"], #quiz-form textarea, #quiz-form select {
     width: 100%;
     padding: 10px 12px;
     margin-bottom: 15px;
@@ -32,10 +25,9 @@
     font-weight: bold;
     display: block;
     margin-bottom: 5px;
-    color: #5e2a8c;
 }
 
-/* Question blocks */
+/* Question / Option / Result blocks */
 .question-block, .result-block {
     background-color: #fff;
     border-radius: 10px;
@@ -45,7 +37,6 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Options inside questions */
 .options-container .option-block {
     display: flex;
     gap: 10px;
@@ -58,7 +49,6 @@
     flex: 1;
 }
 
-/* Buttons */
 #quiz-form button {
     background-color: #622e8a;
     color: white;
@@ -75,20 +65,45 @@
     transform: scale(1.03);
 }
 
-/* Add question/result buttons */
-#add-question-btn, #add-result-btn {
+/* Current images */
+.current-image {
+    max-width: 200px;
+    max-height: 150px;
     display: block;
-    width: 100%;
-    margin-bottom: 20px;
-    text-align: center;
+    margin-bottom: 10px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-    #quiz-form {
-        padding: 15px;
-    }
+/* Tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
 
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 220px;
+    background-color: #622e8a;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; 
+    left: 50%; 
+    margin-left: -110px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive */
+@media(max-width: 600px) {
     .options-container .option-block {
         flex-direction: column;
         align-items: stretch;

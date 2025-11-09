@@ -33,23 +33,57 @@
     </a>
 
     {% for quiz in user_quizzes %}
-    <div class="quiz-card {% if not quiz.is_published %}draft{% endif %}">
-        {% if quiz.image %}<img src="{{ url_for('static', filename=quiz.image) }}" alt="{{ quiz.title }}">{% endif %}
+    <div class="quiz-card {% if not quiz.is_published %}draft{% endif %}" data-quiz-type="{{ quiz.quiz_type }}"
+        data-questions='[
+        {% for q in quiz.questions %}
+        {"options":[
+            {% for o in q.options %}
+            {"is_correct":{{ "true" if o.is_correct else "false" }} }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]}{% if not loop.last %},{% endif %}
+        {% endfor %}
+     ]' data-results='[
+        {% for r in quiz.results %}
+        {"min":{{ r.min_points }},"max":{{ r.max_points }}}{% if not loop.last %},{% endif %}
+        {% endfor %}
+     ]'>
+
+        {% if quiz.image %}
+        <img src="{{ url_for('static', filename=quiz.image) }}" alt="{{ quiz.title }}">
+        {% endif %}
+
         <div class="quiz-card-text">
             <h2>{{ quiz.title }}</h2>
             {% if not quiz.is_published %}<span class="draft-label">Draft</span>{% endif %}
             <p>{{ quiz.description }}</p>
+
             <a href="{{ url_for('quizzes.edit_quiz', quiz_id=quiz.id) }}" class="back-btn">Edit</a>
+
             <form action="{{ url_for('quizzes.delete_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
                 <button type="submit" class="back-btn">Delete</button>
             </form>
+
             {% if not quiz.is_published %}
             <form action="{{ url_for('quizzes.publish_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
-                <button type="submit" class="back-btn">Publish</button>
+                <button type="submit" class="back-btn tooltip" data-quiz-id="{{ quiz.id }}" disabled>
+                    Publish
+                    <span class="tooltiptext">Checking quiz validity...</span>
+                </button>
+            </form>
+            {% endif %}
+
+            {% if quiz.is_published %}
+            <form action="{{ url_for('quizzes.unpublish_quiz', quiz_id=quiz.id) }}" method="POST"
+                style="display:inline;">
+                <button type="submit" class="back-btn">Unpublish</button>
             </form>
             {% endif %}
         </div>
     </div>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/quizzes.js') }}"></script>
 {% endblock %}
