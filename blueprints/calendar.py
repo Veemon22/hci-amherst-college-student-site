@@ -4,7 +4,9 @@ from flask import redirect
 from flask import url_for
 from flask import request
 from flask import session
-from models import db, User, Event
+from models import db
+from models import Event
+from models import User
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow

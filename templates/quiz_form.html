@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz.title if quiz else "Create Quiz" }} - Amherst College Student{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_form.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>{{ quiz.title if quiz else "Create a New Quiz" }}</h1>
+
+<form method="POST">
+    <label for="title">Quiz Title</label>
+    <input type="text" id="title" name="title" value="{{ quiz.title if quiz else '' }}" required>
+
+    <label for="description">Description</label>
+    <textarea id="description" name="description">{{ quiz.description if quiz else '' }}</textarea>
+
+    <label for="image">Quiz Image URL</label>
+    <input type="text" id="image" name="image" value="{{ quiz.image if quiz else '' }}">
+
+    <label for="quiz_type">Quiz Type</label>
+    <select id="quiz_type" name="quiz_type">
+        <option value="objective" {% if quiz and quiz.quiz_type == 'objective' %}selected{% endif %}>Objective</option>
+        <option value="subjective" {% if quiz and quiz.quiz_type == 'subjective' %}selected{% endif %}>Subjective</option>
+    </select>
+
+    <h2>Questions</h2>
+    <div id="questions-container">
+        {% if quiz %}
+            {% for question in quiz.questions %}
+                {% set q_idx = loop.index0 %}
+                <div class="question-block" data-index="{{ q_idx }}">
+                    <h3>Question {{ loop.index }}</h3>
+                    <label>Question Text</label>
+                    <textarea name="question_text[]">{{ question.text }}</textarea>
+
+                    <label>Question Image URL</label>
+                    <input type="text" name="question_image[]" value="{{ question.image if question.image else '' }}">
+
+                    <h4>Options</h4>
+                    {% for option in question.options %}
+                        <div class="option-block">
+                            <input type="text" name="option_text_{{ q_idx }}[]" value="{{ option.text }}">
+                            <input type="number" name="option_points_{{ q_idx }}[]" value="{{ option.points }}">
+                            <label>
+                                Correct
+                                <input type="checkbox" name="option_correct_{{ q_idx }}[]" value="true" {% if option.is_correct %}checked{% endif %}>
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <button type="button" id="add-question-btn">Add Question</button>
+
+    <h2>Results</h2>
+    <div id="results-container">
+        {% if quiz %}
+            {% for result in quiz.results %}
+            <div class="result-block" data-id="{{ result.id }}">
+                <input type="number" name="existing_result_min_{{ result.id }}" value="{{ result.min_points }}">
+                <input type="number" name="existing_result_max_{{ result.id }}" value="{{ result.max_points }}">
+                <input type="text" name="existing_result_text_{{ result.id }}" value="{{ result.text }}">
+                <button type="button" class="delete-result-btn">Delete Result</button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <button type="button" id="add-result-btn">Add Result</button>
+
+    <br><br>
+    <button type="submit">Save Quiz</button>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/quiz_form.js') }}"></script>
+{% endblock %}

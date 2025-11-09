@@ -37,7 +37,7 @@ class Question(db.Model):
     text = db.Column(db.Text, nullable=False)
     image = db.Column(db.String(225), nullable=True)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
-    options = db.relationship('Option', backref='question', lazy=True)
+    options = db.relationship('Option', backref='question', lazy=True, cascade="all, delete-orphan")
 
 class Option(db.Model):
     id = db.Column(db.Integer, primary_key=True)
