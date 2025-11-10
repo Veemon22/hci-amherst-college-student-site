@@ -1,19 +1,23 @@
 import os
 from flask import Blueprint, render_template, redirect, session, url_for, request, current_app, flash, abort
 from werkzeug.utils import secure_filename
-from models import db, User, Quiz, Question, Option, QuizResultRange
+from models import db, User, Quiz, Question, Option, QuizResultRange, QuizResult
 
 quiz_bp = Blueprint('quizzes', __name__, template_folder='../templates')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+
+# ---------- Helpers ----------
 def get_current_user():
     user_id = session.get('user_id')
     if not user_id:
         return None
     return User.query.get(user_id)
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def save_image(file):
     if file and allowed_file(file.filename):
@@ -24,6 +28,7 @@ def save_image(file):
         file.save(filepath)
         return f'uploads/quiz_images/{filename}'
     return None
+
 
 def can_publish(quiz):
     """Helper to determine if a quiz is valid for publishing"""
@@ -41,6 +46,8 @@ def can_publish(quiz):
             return False
     return True
 
+
+# ---------- Quiz Pages ----------
 @quiz_bp.route('/quizzes')
 def quizzes_page():
     user = get_current_user()
@@ -58,7 +65,8 @@ def quizzes_page():
         can_publish=can_publish
     )
 
-# -- Create / Edit Quiz Helper --
+
+# ---------- Create / Edit Quiz ----------
 def save_questions_and_results(quiz):
     seen_question_ids = set()
     question_idx = 0
@@ -117,7 +125,7 @@ def save_questions_and_results(quiz):
 
     db.session.commit()
 
-# -- Create Quiz --
+
 @quiz_bp.route('/quiz/new', methods=['GET', 'POST'])
 def create_quiz():
     user = get_current_user()
@@ -143,7 +151,7 @@ def create_quiz():
 
     return render_template("quiz_form.html", quiz=None, username=user.username)
 
-# -- Edit Quiz --
+
 @quiz_bp.route('/quiz/<int:quiz_id>/edit', methods=['GET', 'POST'])
 def edit_quiz(quiz_id):
     user = get_current_user()
@@ -170,7 +178,8 @@ def edit_quiz(quiz_id):
 
     return render_template("quiz_form.html", quiz=quiz, username=user.username)
 
-# -- Delete / Publish / Unpublish --
+
+# ---------- Delete / Publish ----------
 @quiz_bp.route("/quiz/<int:quiz_id>/delete", methods=["POST"])
 def delete_quiz(quiz_id):
     user = get_current_user()
@@ -186,6 +195,7 @@ def delete_quiz(quiz_id):
     flash("Quiz deleted successfully!", "success")
     return redirect(url_for('quizzes.quizzes_page'))
 
+
 @quiz_bp.route("/quiz/<int:quiz_id>/publish", methods=["POST"])
 def publish_quiz(quiz_id):
     user = get_current_user()
@@ -196,7 +206,6 @@ def publish_quiz(quiz_id):
     if quiz.created_by != user.id:
         abort(403)
 
-    # Check if the quiz is valid for publishing
     if not can_publish(quiz):
         flash("Cannot publish quiz: quiz is invalid. Check questions, options, and result ranges.", "error")
         return redirect(url_for('quizzes.quizzes_page'))
@@ -205,6 +214,7 @@ def publish_quiz(quiz_id):
     db.session.commit()
     flash("Quiz published successfully!", "success")
     return redirect(url_for('quizzes.quizzes_page'))
+
 
 @quiz_bp.route("/quiz/<int:quiz_id>/unpublish", methods=["POST"])
 def unpublish_quiz(quiz_id):
@@ -221,7 +231,8 @@ def unpublish_quiz(quiz_id):
     flash("Quiz unpublished successfully!", "success")
     return redirect(url_for('quizzes.quizzes_page'))
 
-# -- Delete Question --
+
+# ---------- Delete Question / Option / Result ----------
 @quiz_bp.route("/quiz/question/<int:question_id>/delete", methods=["POST"])
 def delete_question(question_id):
     user = get_current_user()
@@ -235,9 +246,9 @@ def delete_question(question_id):
 
     db.session.delete(question)
     db.session.commit()
-    return '', 204  # No content, for fetch JS to handle
+    return '', 204
 
-# -- Delete Option --
+
 @quiz_bp.route("/quiz/option/<int:option_id>/delete", methods=["POST"])
 def delete_option(option_id):
     user = get_current_user()
@@ -253,7 +264,7 @@ def delete_option(option_id):
     db.session.commit()
     return '', 204
 
-# -- Delete Result Range --
+
 @quiz_bp.route("/quiz/result/<int:result_id>/delete", methods=["POST"])
 def delete_result(result_id):
     user = get_current_user()
@@ -268,4 +279,66 @@ def delete_result(result_id):
     db.session.delete(result)
     db.session.commit()
     return '', 204
+
+
+# ---------- Take Quiz (New Route) ----------
+@quiz_bp.route("/quiz/<int:quiz_id>/take")
+def take_quiz(quiz_id):
+    """Render the quiz for a user to take."""
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    if not quiz.is_published:
+        abort(403)  # only published quizzes are visible to users
+
+    return render_template("quiz.html", quiz=quiz, username=user.username)
+
+
+@quiz_bp.route("/quiz/<int:quiz_id>/submit", methods=["POST"])
+def submit_quiz(quiz_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('signin'))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    data = request.get_json()
+    score = data.get("score", 0)
+    total = data.get("total", 0)
+    result_text = data.get("result_text", "")
+
+    quiz_result = QuizResult(
+        score=score,
+        total=total,
+        text=result_text,
+        user_id=user.id,
+        quiz_id=quiz.id
+    )
+    db.session.add(quiz_result)
+    db.session.commit()
+
+    return {"message": "Result saved successfully!"}, 200
+
+@quiz_bp.route("/quiz/<int:quiz_id>/results")
+def view_past_results(quiz_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for("signin"))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    if not quiz:
+        abort(404)
+
+    # Fetch the user's past results, most recent first
+    results = (
+        QuizResult.query
+        .filter_by(user_id=user.id, quiz_id=quiz.id)
+        .order_by(QuizResult.timestamp.desc())
+        .all()
+    )
+
+    return render_template("quiz_results.html", quiz=quiz, results=results, username=user.username)
+
 

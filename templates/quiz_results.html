@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}My Past Results - {{ quiz.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_results.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>My Past Results for "{{ quiz.title }}"</h1>
+
+{% if results %}
+<table class="results-table">
+    <thead>
+        <tr>
+            <th>Date Taken</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Result Text</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in results %}
+        <tr>
+            <td>{{ r.timestamp.strftime("%b %d, %Y %I:%M %p") }}</td>
+            <td>{{ r.score }} / {{ r.total }}</td>
+            <td>{{ "%.1f"|format((r.score / r.total) * 100) }}%</td>
+            <td>{{ r.text }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No past results yet — try taking the quiz!</p>
+{% endif %}
+
+<a href="{{ url_for('quizzes.quizzes_page') }}" class="back-btn">← Back to Quizzes</a>
+{% endblock %}
