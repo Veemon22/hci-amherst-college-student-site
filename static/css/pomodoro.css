@@ -1,0 +1,47 @@
+  .pomodoro-container {
+      text-align: center;
+      padding: 2rem;
+  }
+
+  .phase-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+  }
+
+  .phase-btn {
+      padding: 0.75rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      background-color: #eee;
+      transition: background 0.3s;
+  }
+
+  .phase-btn.active {
+      background-color: #6c63ff;
+      color: white;
+  }
+
+  .timer {
+      font-size: 4rem;
+      font-weight: bold;
+      margin: 1.5rem 0;
+  }
+
+  .pomodoro-actions button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #6c63ff;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+  }
+
+  .pomodoro-actions button:hover {
+      background-color: #5a54d6;
+  }

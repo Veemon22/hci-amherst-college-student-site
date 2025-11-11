@@ -1,69 +1,48 @@
 {% extends "base.html" %}
-{% block title %}Pomodoro - Amherst College Student{% endblock %}
+{% block title %}Pomodoro Timer - Amherst College Student{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/pomodoro.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="home-container">
-    <div class="home-inner">
-        <h1>Hello, {{ username }}! Stay productive with your Pomodoro</h1>
+<div class="pomodoro-container">
+    <h1>Pomodoro Timer</h1>
+    <p>Welcome, {{ username }} 👋</p>
 
-        <!-- Timer Section -->
-        <div class="pomodoro-timer"
-             data-work="{{ config.work }}"
-             data-short-break="{{ config.short_break }}"
-             data-long-break="{{ config.long_break }}">
-            <h2 id="timer-label">Work</h2>
-            <div id="timer-display">{{ config.work }}:00</div>
-            <div class="timer-buttons">
-                <button id="start-btn" class="btn">Start</button>
-                <form method="POST" style="display:inline;">
-                    <input type="hidden" name="action" value="complete_pomodoro">
-                    <button type="submit" class="btn">Complete Pomodoro</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Task Section -->
-        <div class="pomodoro-tasks">
-            <h2>Tasks</h2>
-            <form method="POST" class="add-task-form">
-                <input type="hidden" name="action" value="add_task">
-                <input type="text" name="title" placeholder="New task..." required>
-                <button type="submit" class="btn">Add</button>
-            </form>
-
-            <ul class="task-list">
-                {% for task in tasks %}
-                <li class="{% if task.completed %}completed{% endif %}">
-                    {{ task.title }}
-                    <div class="task-actions">
-                        {% if not task.completed %}
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="action" value="complete_task">
-                            <input type="hidden" name="task_id" value="{{ task.id }}">
-                            <button type="submit" class="btn small-btn">✔</button>
-                        </form>
-                        {% endif %}
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="action" value="delete_task">
-                            <input type="hidden" name="task_id" value="{{ task.id }}">
-                            <button type="submit" class="btn small-btn">🗑</button>
-                        </form>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <!-- Configure / Back Buttons -->
-        <div class="pomodoro-config">
-            <a href="{{ url_for('pomodoro.pomodoro_form') }}" class="btn">Configure Timers</a>
-            <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
-        </div>
+    <div class="phase-buttons">
+        <button class="phase-btn {% if config.current_type == 'work' %}active{% endif %}"
+            data-phase="work">Work</button>
+        <button class="phase-btn {% if config.current_type == 'short_break' %}active{% endif %}"
+            data-phase="short_break">Short Break</button>
+        <button class="phase-btn {% if config.current_type == 'long_break' %}active{% endif %}"
+            data-phase="long_break">Long Break</button>
     </div>
+
+    <div class="pomodoro-timer" data-work="{{ config.work }}" data-short-break="{{ config.short_break }}"
+        data-long-break="{{ config.long_break }}" data-current-type="{{ config.current_type }}">
+        <h2 id="timer-label">{{ config.current_type|replace('_', ' ')|title }}</h2>
+        <div id="timer-display">00:00</div>
+    </div>
+
+    <div class="pomodoro-actions">
+        <button id="start-btn">Start</button>
+
+        <form method="POST" style="display:inline;">
+            <input type="hidden" name="action" value="complete_pomodoro">
+            <button type="submit" id="complete-btn">
+                {% if config.current_type == 'work' %}Complete Work{% else %}Complete Break{% endif %}
+            </button>
+        </form>
+
+        <a href="{{ url_for('pomodoro.pomodoro_form') }}" class="btn secondary">Settings</a>
+    </div>
+
+    <div class="pomodoro-stats">
+        <h3>Number Pomodoros Completed</h3>
+        <p id="pomodoros-completed">{{ user.pomodoros_completed }}</p>
+    </div>
+
 </div>
 {% endblock %}
 

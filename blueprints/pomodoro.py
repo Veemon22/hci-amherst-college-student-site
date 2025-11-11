@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, session, redirect, url_for
 from models import db, User, Pomodoro, Task
 from datetime import datetime
 
@@ -20,7 +20,6 @@ def create_or_update_user_pomodoro_settings(user, work, short_break, long_break)
     user.pomodoro_short_break = int(short_break)
     user.pomodoro_long_break = int(long_break)
     db.session.commit()
-    flash("Pomodoro settings updated!", "success")
 
 
 def add_task(user, title, pomodoro_id):
@@ -28,7 +27,6 @@ def add_task(user, title, pomodoro_id):
         task = Task(user_id=user.id, pomodoro_id=pomodoro_id, title=title)
         db.session.add(task)
         db.session.commit()
-        flash("Task added!", "success")
 
 
 def complete_task(user, task_id):
@@ -36,7 +34,6 @@ def complete_task(user, task_id):
     if task and task.user_id == user.id:
         task.completed = True
         db.session.commit()
-        flash("Task marked as complete!", "success")
 
 
 def delete_task(user, task_id):
@@ -44,7 +41,6 @@ def delete_task(user, task_id):
     if task and task.user_id == user.id:
         db.session.delete(task)
         db.session.commit()
-        flash("Task deleted!", "success")
 
 
 # -------------------------
@@ -79,36 +75,52 @@ def pomodoro_form():
 # Main Pomodoro Page
 @pomodoro_bp.route('/pomodoro', methods=['GET', 'POST'])
 def pomodoro():
+    """Main Pomodoro cycle handler — cycles between work and breaks."""
     user = get_current_user()
     if not user:
         return redirect(url_for('signin'))
 
-    # If user has no Pomodoro sessions yet, redirect to form
-    current_pomodoro = Pomodoro.query.filter_by(user_id=user.id, completed=False).first()
+    # Always maintain one Pomodoro per user
+    current_pomodoro = Pomodoro.query.filter_by(user_id=user.id).first()
     if not current_pomodoro:
-        # Auto-create a new Pomodoro session with user defaults
+        # Create initial Pomodoro if none exists
         current_pomodoro = Pomodoro(
             user_id=user.id,
+            timer_type='work',
             duration_minutes=user.pomodoro_work_duration,
-            timer_type='work'
+            start_time=datetime.utcnow()
         )
         db.session.add(current_pomodoro)
         db.session.commit()
 
-    # Handle POST actions
     if request.method == 'POST':
         action = request.form.get('action')
 
         if action == 'start_pomodoro':
-            if not current_pomodoro.completed:
-                flash("Pomodoro started!", "success")
+            current_pomodoro.start_time = datetime.utcnow()
 
         elif action == 'complete_pomodoro':
-            current_pomodoro.completed = True
-            current_pomodoro.end_time = datetime.utcnow()
-            user.pomodoros_completed += 1
+            # === PHASE TRANSITION ===
+            if current_pomodoro.timer_type == 'work':
+                # Work done → increment user tracker & go to break
+                user.pomodoros_completed += 1
+                next_type = 'long_break' if user.pomodoros_completed % 4 == 0 else 'short_break'
+                next_duration = (
+                    user.pomodoro_long_break if next_type == 'long_break' else user.pomodoro_short_break
+                )
+
+            else:
+                # Break done → back to work
+                next_type = 'work'
+                next_duration = user.pomodoro_work_duration
+
+            # Update current Pomodoro instead of making a new one
+            current_pomodoro.timer_type = next_type
+            current_pomodoro.duration_minutes = next_duration
+            current_pomodoro.start_time = datetime.utcnow()
+            current_pomodoro.end_time = None
+            current_pomodoro.completed = False
             db.session.commit()
-            flash("Pomodoro completed!", "success")
 
         elif action == 'add_task':
             title = request.form.get('title')
@@ -124,12 +136,23 @@ def pomodoro():
 
         return redirect(url_for('pomodoro.pomodoro'))
 
-    # GET: Render page
+    # GET — Render Page
     tasks = Task.query.filter_by(user_id=user.id, pomodoro_id=current_pomodoro.id).all()
+
+    # Choose correct timer duration for current phase
+    if current_pomodoro.timer_type == 'work':
+        duration = user.pomodoro_work_duration
+    elif current_pomodoro.timer_type == 'short_break':
+        duration = user.pomodoro_short_break
+    else:
+        duration = user.pomodoro_long_break
+
     config = {
         'work': user.pomodoro_work_duration,
         'short_break': user.pomodoro_short_break,
-        'long_break': user.pomodoro_long_break
+        'long_break': user.pomodoro_long_break,
+        'current_type': current_pomodoro.timer_type,
+        'duration': duration,
     }
 
     return render_template(

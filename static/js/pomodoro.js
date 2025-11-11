@@ -1,61 +1,77 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const timerDisplay = document.getElementById('timer-display');
-    const startBtn = document.getElementById('start-btn');
-    const timerLabel = document.getElementById('timer-label');
+document.addEventListener("DOMContentLoaded", function () {
+  const timerDisplay = document.getElementById("timer-display");
+  const timerLabel = document.getElementById("timer-label");
+  const startBtn = document.getElementById("start-btn");
+  const completeBtn = document.getElementById("complete-btn");
+  const phaseButtons = document.querySelectorAll(".phase-btn");
 
-    // Pull durations from data attributes
-    const pomodoroEl = document.querySelector('.pomodoro-timer');
-    let workMinutes = parseInt(pomodoroEl.dataset.work);
-    let shortBreak = parseInt(pomodoroEl.dataset.shortBreak);
-    let longBreak = parseInt(pomodoroEl.dataset.longBreak);
+  const timerElement = document.querySelector(".pomodoro-timer");
+  const WORK = parseInt(timerElement.dataset.work) * 60;
+  const SHORT = parseInt(timerElement.dataset.shortBreak) * 60;
+  const LONG = parseInt(timerElement.dataset.longBreak) * 60;
+  let currentPhase = timerElement.dataset.currentType;
 
-    let timeLeft = workMinutes * 60;
-    let timerInterval = null;
-    let isWork = true;
+  let timeLeft = getDuration(currentPhase);
+  let isRunning = false;
+  let timer;
 
-    // Update timer display
-    function updateDisplay() {
-        let minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-        let seconds = (timeLeft % 60).toString().padStart(2, '0');
-        timerDisplay.textContent = `${minutes}:${seconds}`;
-    }
+  function getDuration(phase) {
+    return phase === "work" ? WORK : phase === "short_break" ? SHORT : LONG;
+  }
 
-    // Switch session type (work/break)
-    function switchSession() {
-        if (isWork) {
-            timerLabel.textContent = "Short Break";
-            timeLeft = shortBreak * 60;
-        } else {
-            timerLabel.textContent = "Work";
-            timeLeft = workMinutes * 60;
-        }
-        isWork = !isWork;
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s < 10 ? "0" + s : s}`;
+  }
+
+  function updateDisplay() {
+    timerDisplay.textContent = formatTime(timeLeft);
+    timerLabel.textContent = currentPhase.replace("_", " ").toUpperCase();
+    completeBtn.textContent =
+      currentPhase === "work" ? "Complete Work" : "Complete Break";
+  }
+
+  function setActivePhase(phase) {
+    phaseButtons.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.phase === phase);
+    });
+  }
+
+  function toggleTimer() {
+    if (!isRunning) {
+      isRunning = true;
+      startBtn.textContent = "Pause";
+      timer = setInterval(() => {
+        timeLeft--;
         updateDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          isRunning = false;
+          startBtn.textContent = "Start";
+          alert(`${currentPhase.replace("_", " ")} complete!`);
+        }
+      }, 1000);
+    } else {
+      clearInterval(timer);
+      isRunning = false;
+      startBtn.textContent = "Resume";
     }
+  }
 
-    // Start the timer
-    function startTimer() {
-        if (timerInterval) return; // Already running
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            updateDisplay();
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                switchSession();
-            }
-        }, 1000);
-    }
+  phaseButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      clearInterval(timer);
+      isRunning = false;
+      startBtn.textContent = "Start";
+      currentPhase = btn.dataset.phase;
+      timeLeft = getDuration(currentPhase);
+      setActivePhase(currentPhase);
+      updateDisplay();
+    });
+  });
 
-    // Optional: stop timer function
-    function stopTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-
-    // Event listener
-    startBtn.addEventListener('click', startTimer);
-
-    // Initialize display
-    updateDisplay();
+  startBtn.addEventListener("click", toggleTimer);
+  updateDisplay();
+  setActivePhase(currentPhase);
 });
