@@ -85,8 +85,11 @@ class Task(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     pomodoro_id = db.Column(db.Integer, db.ForeignKey('pomodoro.id'), nullable=True)
     title = db.Column(db.String(200), nullable=False)
+    note = db.Column(db.Text, nullable=True)
+    estimated_pomodoros = db.Column(db.Integer, default=1)
+    completed_pomodoros = db.Column(db.Integer, default=0)
     completed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
-    priority = db.Column(db.Integer, default=0)  # optional for ordering
+    priority = db.Column(db.Integer, default=0)
 
     user = db.relationship('User', backref=db.backref('tasks', lazy=True))

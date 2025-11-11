@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const timerDisplay = document.getElementById("timer-display");
   const timerLabel = document.getElementById("timer-label");
   const startBtn = document.getElementById("start-btn");
+  const completeForm = document.querySelector('form input[value="complete_pomodoro"]').closest("form");
   const completeBtn = document.getElementById("complete-btn");
   const phaseButtons = document.querySelectorAll(".phase-btn");
 
@@ -59,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Phase button click
   phaseButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       clearInterval(timer);
@@ -69,6 +71,31 @@ document.addEventListener("DOMContentLoaded", function () {
       setActivePhase(currentPhase);
       updateDisplay();
     });
+  });
+
+  // Submit "Complete" to backend
+  completeForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearInterval(timer);
+    isRunning = false;
+    startBtn.textContent = "Start";
+
+    try {
+      const formData = new FormData(completeForm);
+      const response = await fetch(window.location.href, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        // Refresh page to update pomodoro state and task counts
+        window.location.reload();
+      } else {
+        alert("Error completing Pomodoro.");
+      }
+    } catch (err) {
+      console.error("Error completing Pomodoro:", err);
+    }
   });
 
   startBtn.addEventListener("click", toggleTimer);

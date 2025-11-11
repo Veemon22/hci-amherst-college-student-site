@@ -22,11 +22,25 @@ def create_or_update_user_pomodoro_settings(user, work, short_break, long_break)
     db.session.commit()
 
 
-def add_task(user, title, pomodoro_id):
+def add_task(user, title, pomodoro_id, note=None, estimated_pomodoros=1, priority=0):
+    """Create a task with optional note, estimated pomodoros, and priority."""
     if title:
-        task = Task(user_id=user.id, pomodoro_id=pomodoro_id, title=title)
+        task = Task(
+            user_id=user.id,
+            pomodoro_id=pomodoro_id,
+            title=title,
+            completed=False,
+            priority=int(priority)
+        )
+        # We'll store note and estimated_pomodoros in extended columns if you add them to Task model
+        if hasattr(Task, 'note') and note:
+            task.note = note
+        if hasattr(Task, 'estimated_pomodoros') and estimated_pomodoros:
+            task.estimated_pomodoros = int(estimated_pomodoros)
+
         db.session.add(task)
         db.session.commit()
+
 
 
 def complete_task(user, task_id):
@@ -42,6 +56,12 @@ def delete_task(user, task_id):
         db.session.delete(task)
         db.session.commit()
 
+def increment_task_pomodoros(user, pomodoro_id):
+    """Increment the completed_pomodoros for active tasks and mark them complete if reached."""
+    tasks = Task.query.filter_by(user_id=user.id, pomodoro_id=pomodoro_id, completed=False).all()
+    for task in tasks:
+        task.completed_pomodoros += 1
+    db.session.commit()
 
 # -------------------------
 # Routes
@@ -102,8 +122,10 @@ def pomodoro():
         elif action == 'complete_pomodoro':
             # === PHASE TRANSITION ===
             if current_pomodoro.timer_type == 'work':
-                # Work done → increment user tracker & go to break
+                # Work done → increment user tracker & task progress, then go to break
                 user.pomodoros_completed += 1
+                increment_task_pomodoros(user, current_pomodoro.id)  # <-- increment task progress
+
                 next_type = 'long_break' if user.pomodoros_completed % 4 == 0 else 'short_break'
                 next_duration = (
                     user.pomodoro_long_break if next_type == 'long_break' else user.pomodoro_short_break
@@ -114,7 +136,7 @@ def pomodoro():
                 next_type = 'work'
                 next_duration = user.pomodoro_work_duration
 
-            # Update current Pomodoro instead of making a new one
+            # Update current Pomodoro
             current_pomodoro.timer_type = next_type
             current_pomodoro.duration_minutes = next_duration
             current_pomodoro.start_time = datetime.utcnow()
@@ -124,7 +146,11 @@ def pomodoro():
 
         elif action == 'add_task':
             title = request.form.get('title')
-            add_task(user, title, current_pomodoro.id)
+            note = request.form.get('note')
+            estimated_pomodoros = request.form.get('estimated_pomodoros', 1)
+            priority = request.form.get('priority', 0)
+            add_task(user, title, current_pomodoro.id, note, estimated_pomodoros, priority)
+
 
         elif action == 'complete_task':
             task_id = request.form.get('task_id')
