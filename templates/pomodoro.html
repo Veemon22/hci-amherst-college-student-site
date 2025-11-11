@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Pomodoro - Amherst College Student{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pomodoro.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <div class="home-inner">
+        <h1>Hello, {{ username }}! Stay productive with your Pomodoro</h1>
+
+        <!-- Timer Section -->
+        <div class="pomodoro-timer"
+             data-work="{{ config.work }}"
+             data-short-break="{{ config.short_break }}"
+             data-long-break="{{ config.long_break }}">
+            <h2 id="timer-label">Work</h2>
+            <div id="timer-display">{{ config.work }}:00</div>
+            <div class="timer-buttons">
+                <button id="start-btn" class="btn">Start</button>
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="complete_pomodoro">
+                    <button type="submit" class="btn">Complete Pomodoro</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Task Section -->
+        <div class="pomodoro-tasks">
+            <h2>Tasks</h2>
+            <form method="POST" class="add-task-form">
+                <input type="hidden" name="action" value="add_task">
+                <input type="text" name="title" placeholder="New task..." required>
+                <button type="submit" class="btn">Add</button>
+            </form>
+
+            <ul class="task-list">
+                {% for task in tasks %}
+                <li class="{% if task.completed %}completed{% endif %}">
+                    {{ task.title }}
+                    <div class="task-actions">
+                        {% if not task.completed %}
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="complete_task">
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <button type="submit" class="btn small-btn">✔</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_task">
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <button type="submit" class="btn small-btn">🗑</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Configure / Back Buttons -->
+        <div class="pomodoro-config">
+            <a href="{{ url_for('pomodoro.pomodoro_form') }}" class="btn">Configure Timers</a>
+            <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/pomodoro.js') }}"></script>
+{% endblock %}

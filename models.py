@@ -6,7 +6,11 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     events = db.relationship('Event', backref='user', lazy=True)
-    quiz_results = db.relationship('QuizResult', backref='user', lazy=True)
+    quiz_results = db.relationship('QuizResult', backref='user', lazy=True, cascade="all, delete-orphan")
+    pomodoro_work_duration = db.Column(db.Integer, default=25)
+    pomodoro_short_break = db.Column(db.Integer, default=5)
+    pomodoro_long_break = db.Column(db.Integer, default=15)
+    pomodoros_completed = db.Column(db.Integer, default=0)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,3 +68,25 @@ class QuizResult(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+
+class Pomodoro(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False, default=db.func.now())
+    end_time = db.Column(db.DateTime, nullable=True)
+    duration_minutes = db.Column(db.Integer)  # Actual session duration (can pull from user config)
+    timer_type = db.Column(db.String(20), default='work')  # 'work', 'short_break', 'long_break'
+    completed = db.Column(db.Boolean, default=False)
+
+    tasks = db.relationship('Task', backref='pomodoro', lazy=True, cascade="all, delete-orphan")
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pomodoro_id = db.Column(db.Integer, db.ForeignKey('pomodoro.id'), nullable=True)
+    title = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    priority = db.Column(db.Integer, default=0)  # optional for ordering
+
+    user = db.relationship('User', backref=db.backref('tasks', lazy=True))

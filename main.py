@@ -1,5 +1,6 @@
 # Imports List
 from blueprints.calendar import calendar_bp
+from blueprints.pomodoro import pomodoro_bp
 from blueprints.quizzes import quiz_bp
 from datetime import datetime
 from dateutil import parser
@@ -29,6 +30,7 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 app.register_blueprint(calendar_bp)
 app.register_blueprint(quiz_bp)
+app.register_blueprint(pomodoro_bp)
 
 load_dotenv()
 cred_json = os.getenv('GOOGLE_CREDENTIALS')
