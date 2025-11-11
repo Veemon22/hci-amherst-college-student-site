@@ -1,47 +1,180 @@
-  .pomodoro-container {
-      text-align: center;
-      padding: 2rem;
-  }
+.pomodoro-container {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  max-width: 800px;
+  margin: 40px auto;
+  text-align: center;
+}
 
-  .phase-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-  }
+.pomodoro-container h1 {
+  color: #5e2a8c;
+  font-family: "Setimo", sans-serif;
+  margin-bottom: 10px;
+}
 
-  .phase-btn {
-      padding: 0.75rem 1.25rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      background-color: #eee;
-      transition: background 0.3s;
-  }
+.pomodoro-container p {
+  color: #555;
+  margin-bottom: 30px;
+  font-family: "Tiempos", serif;
+}
 
-  .phase-btn.active {
-      background-color: #6c63ff;
-      color: white;
-  }
+/* Phase Buttons */
+.phase-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+}
 
-  .timer {
-      font-size: 4rem;
-      font-weight: bold;
-      margin: 1.5rem 0;
-  }
+.phase-btn {
+  background-color: #e8daf7;
+  border: none;
+  color: #5e2a8c;
+  font-family: "Setimo", sans-serif;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
 
-  .pomodoro-actions button {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #6c63ff;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s;
-  }
+.phase-btn.active {
+  background-color: #5e2a8c;
+  color: #fff;
+  transform: scale(1.05);
+}
 
-  .pomodoro-actions button:hover {
-      background-color: #5a54d6;
-  }
+.phase-btn:hover {
+  background-color: #d4b6f5;
+}
+
+/* Timer */
+.pomodoro-timer {
+  margin: 30px 0;
+  background-color: #f9f6fc;
+  border-radius: 12px;
+  padding: 40px 20px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#timer-label {
+  font-size: 1.4rem;
+  color: #5e2a8c;
+  margin-bottom: 10px;
+}
+
+#timer-display {
+  font-size: 3.5rem;
+  font-weight: bold;
+  font-family: "Setimo", sans-serif;
+  color: #2c1650;
+}
+
+/* Buttons & Actions */
+.pomodoro-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+#start-btn, 
+#complete-btn, 
+.btn {
+  background-color: #5e2a8c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: "Setimo", sans-serif;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+#start-btn:hover, 
+#complete-btn:hover, 
+.btn:hover {
+  background-color: #4b216b;
+  transform: translateY(-2px);
+}
+
+.btn.secondary {
+  background-color: #ccc;
+  color: #333;
+}
+
+.btn.small-btn {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  background-color: #e0d4f4;
+  color: #5e2a8c;
+}
+
+.btn.small-btn:hover {
+  background-color: #d4b6f5;
+}
+
+/* Stats */
+.pomodoro-stats {
+  margin: 25px 0;
+  font-family: "Tiempos", serif;
+}
+
+#pomodoros-completed {
+  font-size: 2rem;
+  color: #5e2a8c;
+  font-weight: bold;
+}
+
+/* Task Lists */
+.pomodoro-tasks, .completed-tasks {
+  text-align: left;
+  margin-top: 40px;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.task-list li {
+  background-color: #f9f6fc;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.task-list li strong {
+  font-family: "Setimo", sans-serif;
+  color: #2c1650;
+}
+
+.task-list li em {
+  font-style: normal;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.task-actions form {
+  display: inline-block;
+  margin-left: 6px;
+}
+
+.completed-tasks li.completed {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+/* No Tasks Message */
+.pomodoro-tasks p, .completed-tasks p {
+  font-style: italic;
+  color: #888;
+  text-align: center;
+}
