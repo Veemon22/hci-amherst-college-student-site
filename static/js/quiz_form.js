@@ -15,19 +15,21 @@ addQuestionBtn.addEventListener('click', () => {
         <input type="file" name="question_image_${questionIndex}" accept="image/*">
         <div class="options-container"></div>
         <button type="button" class="add-option-btn">Add Option</button>
+        <button type="button" class="delete-question-btn">Delete Question</button>
     `;
     questionsContainer.appendChild(qDiv);
     questionIndex++;
 });
 
-// --- Add option ---
-questionsContainer.addEventListener('click', e => {
+// --- Add option / delete option / delete question / delete result ---
+document.addEventListener('click', e => {
     const qBlock = e.target.closest('.question-block');
-    if (!qBlock) return;
-    const idx = qBlock.dataset.index;
-    const optionsContainer = qBlock.querySelector('.options-container');
+    const rBlock = e.target.closest('.result-block');
 
-    if (e.target.classList.contains('add-option-btn')) {
+    // Add option
+    if (e.target.classList.contains('add-option-btn') && qBlock) {
+        const idx = qBlock.dataset.index;
+        const optionsContainer = qBlock.querySelector('.options-container');
         if (optionsContainer.children.length >= 4) return alert("Max 4 options");
 
         const oDiv = document.createElement('div');
@@ -36,18 +38,29 @@ questionsContainer.addEventListener('click', e => {
             <input type="text" name="option_text_${idx}[]" placeholder="Option text" required>
             <input type="number" name="option_points_${idx}[]" placeholder="Points" value="1">
             <label class="correct-label">Correct? <input type="checkbox" name="option_correct_${idx}[]" value="true"></label>
+            <button type="button" class="delete-option-btn">Delete Option</button>
         `;
         optionsContainer.appendChild(oDiv);
-
-        // Attach checkbox change listener to toggle points visibility
-        const checkbox = oDiv.querySelector('input[type="checkbox"]');
-        const pointsInput = oDiv.querySelector(`input[name="option_points_${idx}[]"]`);
-        checkbox.addEventListener('change', () => {
-            pointsInput.style.display = checkbox.checked ? 'inline-block' : 'none';
-        });
-
+        toggleCorrectCheckboxes();
         updateValidation();
-        toggleCorrectCheckboxes(); // ensure points visibility matches quiz type
+    }
+
+    // Delete option
+    if (e.target.classList.contains('delete-option-btn') && e.target.closest('.option-block')) {
+        e.target.closest('.option-block').remove();
+        updateValidation();
+    }
+
+    // Delete question
+    if (e.target.classList.contains('delete-question-btn') && qBlock) {
+        qBlock.remove();
+        updateValidation();
+    }
+
+    // Delete result
+    if (e.target.classList.contains('delete-result-btn') && rBlock) {
+        rBlock.remove();
+        updateValidation();
     }
 });
 
@@ -59,49 +72,39 @@ addResultBtn.addEventListener('click', () => {
         <input type="number" name="result_min[]" placeholder="Min points" required>
         <input type="number" name="result_max[]" placeholder="Max points" required>
         <input type="text" name="result_text[]" placeholder="Result text" required>
+        <button type="button" class="delete-result-btn">Delete Result</button>
     `;
     resultsContainer.appendChild(rDiv);
-
     updateValidation();
 });
 
 // --- Toggle correct checkboxes and points visibility ---
 function toggleCorrectCheckboxes() {
     const quizType = document.getElementById('quiz_type').value;
-
     document.querySelectorAll('.option-block').forEach(opt => {
-        const correctLabel = opt.querySelector('label');
-        if (correctLabel && correctLabel.textContent && correctLabel.textContent.includes('Correct?')) {
-            const checkbox = correctLabel.querySelector('input[type="checkbox"]');
-            if (quizType === 'objective') {
-                correctLabel.style.display = 'inline-block';
-                if (checkbox) {
-                    opt.querySelector('input[type="number"]').style.display = checkbox.checked ? 'inline-block' : 'none';
-                }
-            } else { // subjective
-                correctLabel.style.display = 'none';
-                if (checkbox) checkbox.checked = false;
-                const pointsInput = opt.querySelector('input[type="number"]');
-                if (pointsInput) pointsInput.style.display = 'inline-block';
-            }
-        } else {
-            // If there is no label or checkbox, just make sure points input is visible
-            const pointsInput = opt.querySelector('input[type="number"]');
+        const checkbox = opt.querySelector('input[type="checkbox"]');
+        const pointsInput = opt.querySelector('input[type="number"]');
+        const label = opt.querySelector('.correct-label');
+
+        if (quizType === 'objective') {
+            if (label) label.style.display = 'inline-block';
+            if (checkbox && pointsInput) pointsInput.style.display = checkbox.checked ? 'inline-block' : 'none';
+        } else { // subjective
+            if (label) label.style.display = 'none';
+            if (checkbox) checkbox.checked = false;
             if (pointsInput) pointsInput.style.display = 'inline-block';
         }
     });
 }
 
-// --- Validation & tooltip ---
+// --- Validation ---
 function updateValidation() {
     const questions = document.querySelectorAll('.question-block');
     const saveBtn = document.getElementById('save-quiz-btn');
-    const publishBtn = document.getElementById('publish-quiz-btn');
-
+    const publishBtn = document.getElementById('publish-quiz-btn') || document.getElementById('unpublish-quiz-btn');
     let valid = true;
     let message = '';
 
-    // Validate questions
     if (questions.length === 0) {
         valid = false;
         message = "You must add at least one question.";
@@ -113,16 +116,12 @@ function updateValidation() {
 
             const quizType = document.getElementById('quiz_type').value;
             if (quizType === 'objective') {
-                const hasCorrect = Array.from(options).some(opt => {
-                    const checkbox = opt.querySelector('input[type="checkbox"]');
-                    return checkbox ? checkbox.checked : false;
-                });
+                const hasCorrect = Array.from(options).some(opt => opt.querySelector('input[type="checkbox"]')?.checked);
                 if (!hasCorrect) { valid = false; message = `Question ${idx + 1} must have at least one correct option.`; }
             }
         });
     }
 
-    // Validate result ranges
     const results = document.querySelectorAll('.result-block');
     if (results.length === 0) {
         valid = false;
@@ -135,50 +134,32 @@ function updateValidation() {
             if (min > max) { valid = false; message = `Result range ${idx + 1} has min > max.`; }
             ranges.push({min, max});
         });
-
         ranges.sort((a,b) => a.min - b.min);
         for (let i = 0; i < ranges.length - 1; i++) {
             if (ranges[i].max >= ranges[i+1].min) { valid = false; message = `Result ranges ${i+1} and ${i+2} overlap.`; }
         }
     }
 
-    // --- Save button tooltip ---
-    if (!valid) {
-        saveBtn.disabled = true;
-        saveBtn.classList.add('tooltip');
-        let tip = saveBtn.querySelector('.tooltiptext');
-        if (!tip) {
-            tip = document.createElement('span');
-            tip.className = 'tooltiptext';
-            saveBtn.appendChild(tip);
-        }
-        tip.textContent = message;
-    } else {
-        saveBtn.disabled = false;
-        saveBtn.classList.remove('tooltip');
-        const tip = saveBtn.querySelector('.tooltiptext');
-        if (tip) tip.remove();
-    }
-
-    // --- Publish button tooltip (if exists) ---
-    if (publishBtn) {
+    // --- Tooltip handling ---
+    [saveBtn, publishBtn].forEach(btn => {
+        if (!btn) return;
         if (!valid) {
-            publishBtn.disabled = true;
-            publishBtn.classList.add('tooltip');
-            let tip = publishBtn.querySelector('.tooltiptext');
+            btn.disabled = true;
+            btn.classList.add('tooltip');
+            let tip = btn.querySelector('.tooltiptext');
             if (!tip) {
                 tip = document.createElement('span');
                 tip.className = 'tooltiptext';
-                publishBtn.appendChild(tip);
+                btn.appendChild(tip);
             }
             tip.textContent = message;
         } else {
-            publishBtn.disabled = false;
-            publishBtn.classList.remove('tooltip');
-            const tip = publishBtn.querySelector('.tooltiptext');
+            btn.disabled = false;
+            btn.classList.remove('tooltip');
+            const tip = btn.querySelector('.tooltiptext');
             if (tip) tip.remove();
         }
-    }
+    });
 }
 
 // --- Event listeners ---
