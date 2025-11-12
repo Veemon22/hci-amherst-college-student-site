@@ -30,10 +30,13 @@
             </div>
         </div>
 
+        <!-- Include static JS -->
         <script src="{{ url_for('static', filename='js/signin.js') }}"></script>
+
+        <!-- Inline script for user_not_found -->
         <script>
             const userNotFound = {{ 'true' if user_not_found else 'false' }};
-            if (userNotFound){ 
+            if (userNotFound) { 
                 showPopup();
             }
         </script>
