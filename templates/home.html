@@ -10,10 +10,16 @@
 <div class="home-container">
     <div class="home-inner">
         <h1 id="greeting" data-username="{{ username }}">Welcome!</h1>
-        <p class="intro">Take a look at what the site has to offer:</p>
-
+        <p class="intro">
+            This website is a class project for my Human-Computer Interaction course. 
+            It’s an alternate take on Mammoth Mobile, using design and computer science 
+            to explore usability and interactive features for students.
+            Quickly access key tools that help you stay organized, learn about Amherst, 
+            and explore campus resources.
+        </p>
+        <h1>Explore Using Buttons Below:</h1>
         <div class="feature-grid">
-            <a href="{{ url_for('calendar') }}" class="feature-card">
+            <a href="{{ url_for('calendar.calendar') }}" class="feature-card">
                 <div class="icon-circle"><i class="fa-solid fa-calendar-days"></i></div>
                 <h2>Calendar</h2>
                 <p>Keep track of your classes, events, and more.</p>
@@ -25,17 +31,30 @@
                 <p>See what’s on the menu today at Valentine Dining Hall.</p>
             </a>
 
-            <a href="{{ url_for('quizzes_page') }}" class="feature-card">
+            <a href="{{ url_for('quizzes.quizzes_page') }}" class="feature-card">
                 <div class="icon-circle"><i class="fa-solid fa-brain"></i></div>
                 <h2>Quizzes</h2>
-                <p>Take some Amherst Related Quizzes</p>
+                <p>Take and/or make Amherst-related quizzes</p>
+            </a>
+
+            <a href="{{ url_for('pomodoro.pomodoro') }}" class="feature-card">
+                <div class="icon-circle"><i class="fa-solid fa-stopwatch"></i></div>
+                <h2>Pomodoro Timer</h2>
+                <p>Boost your productivity with the Pomodoro technique.</p>
             </a>
 
             <a href="{{ url_for('about') }}" class="feature-card">
                 <div class="icon-circle"><i class="fa-solid fa-book-open"></i></div>
                 <h2>About</h2>
-                <p>Learn more about the project.</p>
+                <p>Learn more about the project and the goals in more detail.</p>
             </a>
+
+            <a href="{{ url_for('signout') }}" class="feature-card">
+                <div class="icon-circle"><i class="fa-solid fa-right-from-bracket"></i></div>
+                <h2>Sign Out</h2>
+                <p>Sign out of your account and/or create a new one.</p>
+            </a>
+
         </div>
     </div>
 </div>

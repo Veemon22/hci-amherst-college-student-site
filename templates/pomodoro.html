@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Pomodoro Timer - Amherst College Student{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pomodoro.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pomodoro-container">
+    <h1>Pomodoro Timer</h1>
+    <p>Welcome, {{ username }} 👋</p>
+
+    <!-- Phase Buttons -->
+    <div class="phase-buttons">
+        <button class="phase-btn {% if config.current_type == 'work' %}active{% endif %}"
+            data-phase="work">Work</button>
+        <button class="phase-btn {% if config.current_type == 'short_break' %}active{% endif %}"
+            data-phase="short_break">Short Break</button>
+        <button class="phase-btn {% if config.current_type == 'long_break' %}active{% endif %}"
+            data-phase="long_break">Long Break</button>
+    </div>
+
+    <!-- Timer -->
+    <div class="pomodoro-timer" data-work="{{ config.work }}" data-short-break="{{ config.short_break }}"
+        data-long-break="{{ config.long_break }}" data-current-type="{{ config.current_type }}">
+        <h2 id="timer-label">{{ config.current_type|replace('_', ' ')|title }}</h2>
+        <div id="timer-display">00:00</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="pomodoro-actions">
+        <button id="start-btn">Start</button>
+
+        <form method="POST" style="display:inline;">
+            <input type="hidden" name="action" value="complete_pomodoro">
+            <button type="submit" id="complete-btn">
+                {% if config.current_type == 'work' %}Complete Work{% else %}Complete Break{% endif %}
+            </button>
+        </form>
+
+        <a href="{{ url_for('pomodoro.pomodoro_form') }}" class="btn secondary">Settings</a>
+    </div>
+
+    <!-- Pomodoros Completed -->
+    <div class="pomodoro-stats">
+        <h3>Number of Pomodoros Completed</h3>
+        <p id="pomodoros-completed">{{ user.pomodoros_completed }}</p>
+    </div>
+
+    <!-- Active Tasks -->
+    <div class="pomodoro-tasks">
+        <h3>Add Task</h3>
+        <form method="POST" class="add-task-form">
+            <input type="hidden" name="action" value="add_task">
+            <input type="text" name="title" placeholder="Task title" required>
+            <input type="text" name="note" placeholder="Optional note">
+            <input type="number" name="estimated_pomodoros" placeholder="Estimated Pomodoros" min="1" value="1">
+            <select name="priority">
+                <option value="0">Normal</option>
+                <option value="1">High</option>
+                <option value="2">Urgent</option>
+            </select>
+            <button type="submit" class="btn">Add Task</button>
+        </form>
+
+        <h3>Active Tasks</h3>
+        {% set active_tasks = tasks | selectattr('completed', 'equalto', False) | list %}
+        {% if active_tasks %}
+        <ul class="task-list">
+            {% for task in active_tasks %}
+            <li>
+                <strong>{{ task.title }}</strong>
+                {% if task.note %}- {{ task.note }}{% endif %}
+                <em>
+                    ({{ task.completed_pomodoros }}/{{ task.estimated_pomodoros }} Pomodoros,
+                    {% if task.priority == 1 %}High{% elif task.priority == 2 %}Urgent{% else %}Normal{% endif %})
+                </em>
+                <div class="task-actions">
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="action" value="complete_task">
+                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                        <button type="submit" class="btn small-btn">✔</button>
+                    </form>
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="action" value="delete_task">
+                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                        <button type="submit" class="btn small-btn">🗑</button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty-message">No active tasks. Add a new task above!</p>
+        {% endif %}
+    </div>
+
+    <!-- Completed Tasks -->
+    {% set completed_tasks = tasks | selectattr('completed', 'equalto', True) | list %}
+    {% if completed_tasks %}
+    <div class="completed-tasks">
+        <h3>Completed Tasks</h3>
+        <ul class="task-list completed">
+            {% for task in completed_tasks %}
+            <li class="completed">
+                <strong>{{ task.title }}</strong>
+                {% if task.note %}- {{ task.note }}{% endif %}
+                <em>
+                    ({{ task.completed_pomodoros }}/{{ task.estimated_pomodoros }} Pomodoros,
+                    {% if task.priority == 1 %}High{% elif task.priority == 2 %}Urgent{% else %}Normal{% endif %})
+                </em>
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="delete_task">
+                    <input type="hidden" name="task_id" value="{{ task.id }}">
+                    <button type="submit" class="btn small-btn">🗑</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/pomodoro.js') }}"></script>
+{% endblock %}

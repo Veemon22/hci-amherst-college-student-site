@@ -1,0 +1,111 @@
+/* Form container */
+#quiz-form {
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: #f9f7fc;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+#quiz-form h1, #quiz-form h2, #quiz-form h3, #quiz-form h4 {
+    color: #5e2a8c;
+}
+
+#quiz-form input[type="text"], #quiz-form input[type="number"], #quiz-form textarea, #quiz-form select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+#quiz-form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Question / Option / Result blocks */
+.question-block, .result-block {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #d9c8f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.options-container .option-block {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.options-container .option-block input[type="text"],
+.options-container .option-block input[type="number"] {
+    flex: 1;
+}
+
+#quiz-form button {
+    background-color: #622e8a;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#quiz-form button:hover {
+    background-color: #4a1e6e;
+    transform: scale(1.03);
+}
+
+/* Current images */
+.current-image {
+    max-width: 200px;
+    max-height: 150px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 220px;
+    background-color: #622e8a;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; 
+    left: 50%; 
+    margin-left: -110px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive */
+@media(max-width: 600px) {
+    .options-container .option-block {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

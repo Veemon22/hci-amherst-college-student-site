@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Calendar - Amherst College Student{% endblock %}
+{% block title %}Guest Calendar - Amherst College Student{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
@@ -10,10 +10,41 @@
 <h1>Your Calendar</h1>
 <p>Welcome, {{ username }}! Here is your personalized calendar.</p>
 
+<div class="calendar-actions">
+    {% if not session.get('gcal_credentials') %}
+        <form action="{{ url_for('calendar.authorize_gcal') }}" method="get" style="display:inline;">
+            <button type="submit" class="calendar-btn connect-btn">
+                Connect Google Calendar
+            </button>
+        </form>
+    {% else %}
+        <div class="gcal-connected">
+            <span>✅ Google Calendar Connected</span>
+            <form action="{{ url_for('calendar.calendar') }}" method="get" style="display:inline;">
+                <button type="submit" class="calendar-btn refresh-btn">
+                    Refresh Google Events
+                </button>
+            </form>
+            <form action="{{ url_for('calendar.disconnect_gcal') }}" method="get" style="display:inline;">
+                <button type="submit" class="calendar-btn disconnect-btn">
+                    Disconnect Google Calendar
+                </button>
+            </form>
+            <button id="open-sync-all-modal" class="calendar-btn sync-all-btn">
+                Sync All Guest Events to Google Calendar
+            </button>
+            <button id="open-import-gcal-modal" class="calendar-btn import-btn">
+                Import Google Calendar Events
+            </button>
+
+        </div>
+    {% endif %}
+</div>
+
 <div class="calendar-header">
-    <a href="{{ url_for('calendar', month=prev_month, year=prev_year) }}" class="calendar-nav-btn">&lt; Prev</a>
+    <a href="{{ url_for('calendar.calendar', month=prev_month, year=prev_year) }}" class="calendar-nav-btn">&lt; Prev</a>
     <h2>{{ current_month }}/{{ current_year }}</h2>
-    <a href="{{ url_for('calendar', month=next_month, year=next_year) }}" class="calendar-nav-btn">Next &gt;</a>
+    <a href="{{ url_for('calendar.calendar', month=next_month, year=next_year) }}" class="calendar-nav-btn">Next &gt;</a>
 </div>
 
 <div id="calendar-container">
@@ -34,14 +65,32 @@
                         {% set today_class = 'today' if day == current_day else '' %}
                         <td class="{{ today_class }}">
                             <div class="day-number">{{ day }}</div>
-                            {% for event in events %}
+                            {# Guest events #}
+                            {% for event in guest_events %}
                                 {% if event.date.day == day and event.date.month == current_month %}
-                                    <div class="event"
+                                    <div class="event guest-event"
+                                        data-id="{{ event.id }}"
+                                        data-gcal-id="{{ event.gcal_id or '' }}"
                                         data-title="{{ event.title }}"
                                         data-description="{{ event.description or 'No description provided.' }}"
                                         data-time="{{ event.date.strftime('%I:%M %p') }}"
                                         onclick="showEventModal(this)">
-                                        {{ event.title }}
+                                        {{ event.date.strftime('%I:%M %p') }} - {{ event.title }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
+                            {# Google Calendar events #}
+                            {% for event in gcal_events %}
+                                {% set event_date = event.start_dt %}
+                                {% if event_date.day == day and event_date.month == current_month %}
+                                    <div class="event"
+                                        data-gcal-id="{{ event.get('id') }}"
+                                        data-title="{{ event.summary }}"
+                                        data-description="{{ event.description or 'No description provided.' }}"
+                                        data-time="{{ event_date.strftime('%I:%M %p') }}"
+                                        onclick="showEventModal(this)">
+                                        {{ event_date.strftime('%I:%M %p') }} - {{ event.summary }}
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -59,7 +108,8 @@
         <div class="modal-content">
             <span id="close-add-event-modal" class="close-btn">&times;</span>
             <h3>Add New Event</h3>
-            <form action="{{ url_for('calendar') }}" method="post" id="add-event-form">
+            <form action="{{ url_for('calendar.calendar') }}" method="post" id="add-event-form">
+                <input type="hidden" name="action" value="add_guest_event">
                 <label>Title:</label>
                 <input type="text" name="title" required>
                 <label>Description:</label>
@@ -68,6 +118,13 @@
                 <input type="date" name="date" required>
                 <label>Time:</label>
                 <input type="time" name="time" step="60" required>
+
+                {% if session.get('gcal_credentials') %}
+                <label>
+                    <input type="checkbox" name="sync_to_gcal">
+                    Also add to Google Calendar
+                </label>
+                {% endif %}
                 <button type="submit" class="submit-btn">Add Event</button>
             </form>
         </div>
@@ -76,10 +133,69 @@
     <div id="eventModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h3 id="modal-title"></h3>
-            <p><strong>Time:</strong> <span id="modal-time"></span></p>
-            <p><strong>Description:</strong></p>
-            <p id="modal-description"></p>
+            <label><strong>Title:</strong></label>
+            <input type="text" id="modal-title-input">
+            <label><strong>Time:</strong></label>
+            <input type="time" id="modal-time-input">
+            <label><strong>Description:</strong></label>
+            <textarea id="modal-description-input"></textarea>
+
+            <input type="hidden" id="modal-event-id">
+            <input type="hidden" id="modal-gcal-id">
+
+            <div class="modal-buttons">
+                <button id="save-event-btn" class="submit-btn">Save Changes</button>
+                <button id="delete-event-btn" class="submit-btn">Delete Event</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Sync Confirmation Modal -->
+    <div id="syncConfirmModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-sync-modal" class="close-btn">&times;</span>
+            <h3>Sync Guest Events</h3>
+            <p>This will add all your guest events to your Google Calendar.</p>
+            <p>Do you want to continue?</p>
+            <div class="modal-buttons">
+                <form action="{{ url_for('calendar.sync_all_to_gcal') }}" method="post" style="display:inline;">
+                    <button type="submit" class="submit-btn confirm-btn">Yes, Sync All</button>
+                </form>
+                <button id="cancel-sync-btn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-delete-modal" class="close-btn">&times;</span>
+            <h3>Delete Event</h3>
+            <p id="delete-confirm-text">Are you sure you want to delete this event?</p>
+            <div class="modal-buttons">
+                <form id="delete-event-form" action="{{ url_for('calendar.delete_event') }}" method="post" style="display:inline;">
+                    <input type="hidden" name="event_id" id="delete-event-id">
+                    <input type="hidden" name="gcal_id" id="delete-gcal-id">
+                    <button type="submit" class="submit-btn confirm-btn">Yes, Delete</button>
+                </form>
+                <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Google Calendar Events Modal -->
+    <div id="importGcalModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-import-modal" class="close-btn">&times;</span>
+            <h3>Import Google Calendar Events</h3>
+            <p>This will import all your Google Calendar events into the local calendar database.</p>
+            <p>Do you want to continue?</p>
+            <div class="modal-buttons">
+                <form action="{{ url_for('calendar.import_gcal_to_db') }}" method="post" style="display:inline;">
+                    <button type="submit" class="submit-btn confirm-btn">Yes, Import All</button>
+                </form>
+                <button id="cancel-import-btn" class="cancel-btn">Cancel</button>
+            </div>
         </div>
     </div>
 

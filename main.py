@@ -1,6 +1,10 @@
 # Imports List
+from blueprints.calendar import calendar_bp
+from blueprints.pomodoro import pomodoro_bp
+from blueprints.quizzes import quiz_bp
 from datetime import datetime
-from datetime import date
+from dateutil import parser
+from dotenv import load_dotenv
 from flask import Flask
 from flask import jsonify
 from flask import render_template
@@ -9,11 +13,9 @@ from flask import url_for
 from flask import request
 from flask import session
 from models import db
-from models import Event
 from models import User
-from quiz_data import quizzes
 
-import calendar as Calendar
+import json
 import os
 import random
 
@@ -22,6 +24,18 @@ app.secret_key = "supersecretkey"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'quiz_images')
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 
+
+app.register_blueprint(calendar_bp)
+app.register_blueprint(quiz_bp)
+app.register_blueprint(pomodoro_bp)
+
+load_dotenv()
+cred_json = os.getenv('GOOGLE_CREDENTIALS')
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # For development only
 
 adjectives = [
     "Adventurous", "Brave", "Curious", "Diligent", "Energetic",
@@ -112,94 +126,6 @@ def dining():
         session.pop('user_id', None)
         return redirect(url_for('signin'))
     return render_template('dining.html', username=user.username)
-
-# Calendar Page
-@app.route('/calendar', methods=['GET', 'POST'])
-def calendar():
-    user = get_current_user()
-    if not user:
-        session.pop('user_id', None)
-        return redirect(url_for('signin'))
-
-
-    # Handle form submission
-    if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        date_str = request.form.get('date')
-        time_str = request.form.get('time')
-
-        if not title or not date_str or not time_str:
-            return redirect(url_for('calendar'))
-
-        datetime_str = f"{date_str}T{time_str}"
-        event_date = datetime.fromisoformat(datetime_str)
-
-        new_event = Event(
-            title=title,
-            description=description,
-            date=event_date,
-            user_id=user.id
-        )
-        db.session.add(new_event)
-        db.session.commit()
-        return redirect(url_for('calendar'))
-
-    # Build calendar for current month
-    now = datetime.now()
-    month = int(request.args.get('month', now.month))
-    year = int(request.args.get('year', now.year))
-
-    cal = Calendar.Calendar(firstweekday=6)  # Sunday start
-    month_days = cal.monthdayscalendar(year, month)  # full month
-
-    # Get user's events for this month
-    events = Event.query.filter(
-        Event.user_id == user.id,
-        Event.date.between(datetime(year, 1, 1), datetime(year, 12, 31))
-    ).all()
-
-    # Calculate previous and next month/year for navigation
-    prev_month = month - 1 if month > 1 else 12
-    prev_year = year if month > 1 else year - 1
-    next_month = month + 1 if month < 12 else 1
-    next_year = year if month < 12 else year + 1
-
-    return render_template(
-        'calendar.html',
-        username=user.username,
-        calendar_data=month_days,
-        current_day=now.day if (month == now.month and year == now.year) else 0,
-        current_month=month,
-        current_year=year,
-        events=events,
-        prev_month=prev_month,
-        prev_year=prev_year,
-        next_month=next_month,
-        next_year=next_year
-    )
-# Quizes Page
-@app.route("/quizzes")
-def quizzes_page():
-    user = get_current_user()
-    if not user:
-        session.pop('user_id', None)
-        return redirect(url_for('signin'))
-    return render_template("quizzes.html", username=user.username, quizzes=quizzes)
-
-
-@app.route("/quiz/<quiz_id>")
-def quiz_page(quiz_id):
-    user = get_current_user()
-    if not user:
-        session.pop('user_id', None)
-        return redirect(url_for('signin'))
-    quiz = quizzes.get(quiz_id)
-
-    if not quiz:
-        return "Quiz not found", 404
-
-    return render_template("quiz.html", username=user.username, quiz=quiz)
 
 # About Page
 @app.route('/about')
