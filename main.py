@@ -3,16 +3,16 @@ from blueprints.calendar import calendar_bp
 from blueprints.pomodoro import pomodoro_bp
 from blueprints.quizzes import quiz_bp
 from datetime import datetime
-from dateutil import parser
 from dotenv import load_dotenv
 from flask import Flask
-from flask import jsonify
 from flask import render_template
 from flask import redirect
 from flask import url_for
 from flask import request
 from flask import session
+from ics import Calendar as ICSCalendar
 from models import db
+from models import Event
 from models import User
 
 import json
@@ -68,9 +68,49 @@ def signin():
     
     return render_template('signin.html', user_not_found=False)
 
+
+def import_ics_for_user(user, ics_path):
+    """
+    Imports events from a .ics file for a given user.
+    Returns the number of events added.
+    """
+    if not user or not ics_path or not os.path.exists(ics_path):
+        return 0
+
+    added_count = 0
+    with open(ics_path, 'r') as f:
+        ics_calendar = ICSCalendar(f.read())
+
+    for ics_event in ics_calendar.events:
+        # Start and end datetime
+        start_dt = ics_event.begin.datetime
+        end_dt = ics_event.end.datetime if ics_event.end else start_dt
+
+        # Check for duplicates (optional)
+        exists = Event.query.filter_by(
+            user_id=user.id,
+            title=ics_event.name,
+            date=start_dt
+        ).first()
+        if exists:
+            continue
+
+        # Create new Event
+        new_event = Event(
+            title=ics_event.name or "No Title",
+            description=ics_event.description or "",
+            date=start_dt,
+            user_id=user.id
+        )
+        db.session.add(new_event)
+        added_count += 1
+
+    db.session.commit()
+    return added_count
+
 @app.route('/new_user', methods=['POST'])
 def new_user():
-    # Pulls all users in DB
+    # Pull all users in DB
     existing_usernames = [u.username for u in User.query.all()]
 
     # Generate a unique username
@@ -86,6 +126,10 @@ def new_user():
     new_user = User(username=username)
     db.session.add(new_user)
     db.session.commit()
+
+    # Import default calendar events from .ics
+    ics_path = os.path.join(app.root_path, 'calendar_info/calendar_25_26.ics')
+    import_ics_for_user(new_user, ics_path)
 
     # Store ID in session
     session['user_id'] = new_user.id

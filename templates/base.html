@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,12 +9,12 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="top-nav">
-        <img src=" {{ url_for('static', filename='images/2022_1101_Fall-Scenics_129.jpg') }}">
+    <header class="top-nav">
+        <img src="{{ url_for('static', filename='images/2022_1101_Fall-Scenics_129.jpg') }}" alt="Amherst College Scenery">
         <nav class="nav-link-bar">
             <ul class="nav-links">
                 <li class="username-menu">
-                    <div class="username-menu-toggle">
+                    <div class="username-menu-toggle" aria-haspopup="true" aria-expanded="false">
                         Hello, {{ username }} ▼
                     </div>
                     <ul class="username-dropdown">
@@ -30,16 +29,21 @@
                 <li><a href="{{ url_for('about') }}">About</a></li>
             </ul>
         </nav>
-    </div>
+    </header>
 
     <main>
         {% block content %}
+        <section class="card">
+            <h2>Welcome, {{ username }}!</h2>
+            <p>This is your dashboard where you can access all tools and resources.</p>
+        </section>
         {% endblock %}
     </main>
 
     <footer>
         <p>Thoughts on the site? Go to this <a href="https://docs.google.com/forms/d/e/1FAIpQLSeo3COQ1hdIsMAx5IqhksQxmYO6FpksJIj16NoFkYAV8ktkmA/viewform?usp=dialog" target="_blank">link</a></p>
     </footer>
+
     <script src="{{ url_for('static', filename='js/base.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
