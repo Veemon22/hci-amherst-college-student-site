@@ -1,3 +1,4 @@
+/* --- Calendar Container --- */
 #calendar-container {
     width: 100%;
     max-width: 1200px;
@@ -8,13 +9,16 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    min-height: 1000px;
+    min-height: 600px;
+    box-sizing: border-box;
 }
 
+/* --- Calendar Actions --- */
 .calendar-actions {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 20px;
 }
@@ -41,26 +45,31 @@
     gap: 10px;
     font-weight: bold;
     color: green;
+    flex-wrap: wrap;
 }
 
+/* --- Calendar Header --- */
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .calendar-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     margin: 0;
+    flex-grow: 1;
 }
 
 .calendar-nav-btn {
     background-color: #5e2a8c;
+    color: #fff;
+    text-decoration: none;
     padding: 8px 16px;
     border-radius: 6px;
     transition: background-color 0.2s ease, transform 0.1s ease;
-    display: inline-block;
 }
 
 .calendar-nav-btn:hover {
@@ -68,11 +77,12 @@
     transform: translateY(-2px);
 }
 
+/* --- Calendar Table --- */
 .calendar-table {
     width: 100%;
-    height: 100%;
     border-collapse: collapse;
     flex-grow: 1;
+    table-layout: fixed;
 }
 
 .calendar-table th,
@@ -80,44 +90,86 @@
     border: 1px solid #ccc;
     width: 14.28%;
     vertical-align: top;
-    padding: 5px;
-    height: calc(100% / 6);
+    padding: 8px;
+    min-height: 100px;
     position: relative;
     box-sizing: border-box;
+    text-align: center; /* center day numbers */
+}
+
+.calendar-table th {
+    background-color: #f3f3f3;
+    font-weight: bold;
 }
 
 .empty-day {
     background-color: #f9f9f9;
 }
-
-.today {
+/* Full-cell highlight for today */
+.calendar-table td.today {
     background-color: #5e2a8c;
     color: #fff;
-    border-radius: 5px;
+    border-radius: 8px; /* soft corners */
+    padding: 5px; /* small padding so events don't touch edges */
+    vertical-align: top; /* keep events starting at the top */
 }
 
-.day-number {
+/* Keep day number bold and slightly larger */
+.calendar-table td.today .day-number {
     font-weight: bold;
+    font-size: 1.1rem;
     margin-bottom: 5px;
 }
 
+/* Events inside today cell: make them readable on dark bg */
+.calendar-table td.today .event {
+    background-color: rgba(255, 255, 255, 0.2); /* slightly transparent white */
+    color: #fff;
+}
+
+.calendar-table td.today .event:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+
+
+.day-number {
+    font-weight: bold;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* --- Events --- */
 .event {
     background-color: #f0e6fa;
     color: #5e2a8c;
-    padding: 2px 4px;
-    margin-bottom: 2px;
-    border-radius: 3px;
+    padding: 3px 6px;
+    margin: 3px 0;
+    border-radius: 4px;
     font-size: 0.85rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    text-align: left; /* event text aligned left for readability */
 }
 
 .event:hover {
     background-color: #d9c8f0;
 }
 
+/* Make table cells scrollable if too many events */
+.calendar-table td {
+    overflow-y: auto;
+}
+
+/* --- Add Event Button --- */
 #open-add-event-modal {
-    margin-top: 20px;
+    margin: 20px auto;
+    display: block;
     padding: 10px 16px;
     background-color: #5e2a8c;
     color: white;
@@ -132,13 +184,14 @@
     background-color: #4b216b;
 }
 
+/* --- Modals --- */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0,0,0,0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -153,17 +206,21 @@
     background: white;
     padding: 20px;
     border-radius: 12px;
-    width: 320px;
+    width: 90%;
+    max-width: 400px;
     text-align: center;
-    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+    box-shadow: 0 0 15px rgba(0,0,0,0.25);
     position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
+/* Modal close button */
 .close-btn {
     position: absolute;
     top: 10px;
     right: 15px;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
     color: #5e2a8c;
     transition: color 0.2s ease;
@@ -173,40 +230,41 @@
     color: #4b216b;
 }
 
-#addEventModal .modal-content {
-    max-width: 400px;
-    padding: 25px;
-    background-color: #fff;
-    border-radius: 12px;
-    text-align: left;
-}
-
-#addEventModal h3 {
+/* --- Add / Edit Event Form --- */
+#addEventModal h3,
+#eventModal h3 {
     margin-top: 0;
     color: #5e2a8c;
     text-align: center;
 }
 
-#addEventModal form {
+#addEventModal form,
+#eventModal form {
     display: flex;
     flex-direction: column;
+    gap: 12px;
+    text-align: left;
 }
 
-#addEventModal label {
+#addEventModal label,
+#eventModal label {
     font-weight: bold;
-    margin-top: 10px;
 }
 
-#addEventModal input {
-    margin-top: 5px;
+#addEventModal input,
+#addEventModal textarea,
+#eventModal input,
+#eventModal textarea {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-#addEventModal .submit-btn {
-    margin-top: 15px;
+#addEventModal .submit-btn,
+#eventModal .submit-btn {
     padding: 10px 16px;
     background-color: #5e2a8c;
     color: #fff;
@@ -217,6 +275,15 @@
     transition: background-color 0.2s ease;
 }
 
-#addEventModal .submit-btn:hover {
+#addEventModal .submit-btn:hover,
+#eventModal .submit-btn:hover {
     background-color: #4b216b;
+}
+
+/* --- Modal Buttons Container --- */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 15px;
 }

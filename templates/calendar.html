@@ -8,7 +8,7 @@
 
 {% block content %}
 <h1>Your Calendar</h1>
-<p>Welcome, {{ username }}! Here is your personalized calendar.</p>
+<p>Welcome, {{ username }}! Here is your personalized calendar. We have our own database for Calendar events but feel free to connect your google account.</p>
 
 <div class="calendar-actions">
     {% if not session.get('gcal_credentials') %}
