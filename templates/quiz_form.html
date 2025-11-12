@@ -95,14 +95,16 @@
     <!-- Save and Publish -->
     <button type="submit" id="save-quiz-btn">Save Quiz</button>
 
-    {% if not quiz.is_published %}
-    <form method="POST" action="{{ url_for('quizzes.publish_quiz', quiz_id=quiz.id) }}" style="display:inline;">
-        <button type="submit" id="publish-quiz-btn">Publish</button>
-    </form>
-    {% else %}
-    <form method="POST" action="{{ url_for('quizzes.unpublish_quiz', quiz_id=quiz.id) }}" style="display:inline;">
-        <button type="submit" id="publish-quiz-btn">Unpublish</button>
-    </form>
+    {% if quiz %}
+        {% if not quiz.is_published %}
+        <form method="POST" action="{{ url_for('quizzes.publish_quiz', quiz_id=quiz.id) }}" style="display:inline;">
+            <button type="submit" id="publish-quiz-btn">Publish</button>
+        </form>
+        {% else %}
+        <form method="POST" action="{{ url_for('quizzes.unpublish_quiz', quiz_id=quiz.id) }}" style="display:inline;">
+            <button type="submit" id="publish-quiz-btn">Unpublish</button>
+        </form>
+        {% endif %}
     {% endif %}
 
 </form>

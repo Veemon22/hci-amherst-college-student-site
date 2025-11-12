@@ -51,7 +51,6 @@ def calendar():
             datetime_str = f"{date_str}T{time_str}"
             event_date = datetime.fromisoformat(datetime_str)
 
-            # Save locally first
             new_event = Event(
                 title=title,
                 description=description,
@@ -61,7 +60,7 @@ def calendar():
             db.session.add(new_event)
             db.session.commit()
 
-            # If syncing to Google Calendar
+            # Sync to Google Calendar if selected
             if sync_to_gcal and 'gcal_credentials' in session:
                 creds_data = session['gcal_credentials']
                 creds = Credentials(**creds_data)
@@ -71,16 +70,13 @@ def calendar():
                     'summary': title,
                     'description': description,
                     'start': {'dateTime': event_date.isoformat(), 'timeZone': 'America/New_York'},
-                    'end': {'dateTime': (event_date).isoformat(), 'timeZone': 'America/New_York'}
+                    'end': {'dateTime': event_date.isoformat(), 'timeZone': 'America/New_York'}
                 }
 
                 created_event = service.events().insert(calendarId='primary', body=gcal_event).execute()
-
-                # Save the Google Calendar event ID to local DB
                 new_event.gcal_id = created_event.get('id')
                 db.session.commit()
 
-                # Update stored credentials if token refreshed
                 session['gcal_credentials'] = {
                     'token': creds.token,
                     'refresh_token': creds.refresh_token,
@@ -93,22 +89,32 @@ def calendar():
         return redirect(url_for('calendar.calendar'))
 
     # -------------------------
-    # Fetch Local (Guest) Events
+    # Determine Month & Year
     # -------------------------
     now = datetime.now()
     month = int(request.args.get('month', now.month))
     year = int(request.args.get('year', now.year))
 
-    cal = Calendar.Calendar(firstweekday=6)  # Sunday start
+    cal = Calendar.Calendar(firstweekday=6)
     month_days = cal.monthdayscalendar(year, month)
+
+    # -------------------------
+    # Local Guest Events
+    # -------------------------
+    first_day = datetime(year, month, 1)
+    if month == 12:
+        last_day = datetime(year + 1, 1, 1)
+    else:
+        last_day = datetime(year, month + 1, 1)
 
     guest_events = Event.query.filter(
         Event.user_id == user.id,
-        Event.date.between(datetime(year, 1, 1), datetime(year, 12, 31))
+        Event.date >= first_day,
+        Event.date < last_day
     ).all()
 
     # -------------------------
-    # Fetch Google Calendar Events
+    # Google Calendar Events (multi-day + all-day aware)
     # -------------------------
     gcal_events = []
     if 'gcal_credentials' in session:
@@ -116,44 +122,88 @@ def calendar():
         creds = Credentials(**creds_data)
         service = build('calendar', 'v3', credentials=creds)
 
-        now_utc = datetime.utcnow().isoformat() + 'Z'
+        from datetime import timezone, timedelta
+        from dateutil import parser
+
+        # Expand 1 day either side to catch overlapping events
+        time_min = (datetime(year, month, 1, tzinfo=timezone.utc) - timedelta(days=1)).isoformat()
+        if month == 12:
+            time_max = (datetime(year + 1, 1, 1, tzinfo=timezone.utc) + timedelta(days=1)).isoformat()
+        else:
+            time_max = (datetime(year, month + 1, 1, tzinfo=timezone.utc) + timedelta(days=1)).isoformat()
+
         events_result = service.events().list(
             calendarId='primary',
-            maxResults=50,
             singleEvents=True,
             orderBy='startTime',
-            timeMin=now_utc
+            timeMin=time_min,
+            timeMax=time_max,
+            maxResults=250
         ).execute()
-        gcal_events_raw = events_result.get('items', [])
 
-        # Build a set of current Google Calendar IDs
+        gcal_events_raw = events_result.get('items', [])
         current_gcal_ids = {e['id'] for e in gcal_events_raw}
 
-        # Clear gcal_id from local guest events if deleted in GCal
+        # Remove deleted links
         for e in guest_events:
             if e.gcal_id and e.gcal_id not in current_gcal_ids:
                 e.gcal_id = None
         db.session.commit()
 
-        # Filter out Google Calendar events that are already linked to local guest events
+        # Filter out locally linked events
         linked_gcal_ids = {e.gcal_id for e in guest_events if e.gcal_id}
         filtered_gcal_events = [
-            e for e in gcal_events_raw
-            if e.get('id') not in linked_gcal_ids
+            e for e in gcal_events_raw if e.get('id') not in linked_gcal_ids
         ]
 
-        # Convert Google event start times to datetime objects
-        for e in filtered_gcal_events:
-            start_str = e.get('start', {}).get('dateTime') or e.get('start', {}).get('date')
-            if start_str:
-                try:
-                    e['start_dt'] = parser.isoparse(start_str)
-                except Exception:
-                    e['start_dt'] = None
-            else:
-                e['start_dt'] = None
+        # Month boundaries
+        month_start = datetime(year, month, 1, tzinfo=timezone.utc)
+        month_end = datetime(year + (month == 12), (month % 12) + 1, 1, tzinfo=timezone.utc)
 
-        gcal_events = filtered_gcal_events
+        expanded_events = []
+
+        for e in filtered_gcal_events:
+            start_info = e.get('start', {})
+            end_info = e.get('end', {})
+            start_str = start_info.get('dateTime') or start_info.get('date')
+            end_str = end_info.get('dateTime') or end_info.get('date')
+
+            if not start_str:
+                continue
+
+            try:
+                start_dt = parser.isoparse(start_str)
+                end_dt = parser.isoparse(end_str) if end_str else start_dt
+            except Exception:
+                continue
+
+            # Handle all-day events (`date` fields) — treat end date as exclusive
+            is_all_day = 'date' in start_info
+            if is_all_day:
+                start_dt = datetime.combine(start_dt.date(), datetime.min.time(), tzinfo=timezone.utc)
+                end_dt = datetime.combine(end_dt.date(), datetime.min.time(), tzinfo=timezone.utc)
+
+            # Check overlap
+            if start_dt >= month_end or end_dt < month_start:
+                continue  # Outside visible month
+
+            # If all-day or multi-day → expand into individual day entries
+            if is_all_day or (end_dt - start_dt).days >= 1:
+                current_day = start_dt
+                while current_day < end_dt:
+                    if month_start <= current_day < month_end:
+                        clone = e.copy()
+                        clone['start_dt'] = current_day
+                        clone['is_all_day'] = True
+                        expanded_events.append(clone)
+                    current_day += timedelta(days=1)
+            else:
+                # Regular timed event
+                e['start_dt'] = start_dt
+                e['is_all_day'] = False
+                expanded_events.append(e)
+
+        gcal_events = expanded_events
 
     # -------------------------
     # Month Navigation
@@ -180,6 +230,7 @@ def calendar():
         next_month=next_month,
         next_year=next_year
     )
+
 
 # Authorization route
 @calendar_bp.route('/authorize_gcal')
