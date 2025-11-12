@@ -35,7 +35,7 @@ app.register_blueprint(pomodoro_bp)
 load_dotenv()
 cred_json = os.getenv('GOOGLE_CREDENTIALS')
 
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # For development only
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # For development only
 
 adjectives = [
     "Adventurous", "Brave", "Curious", "Diligent", "Energetic",
