@@ -8,20 +8,25 @@
 
 {% block content %}
 <h1>🧠 Quizzes</h1>
+<p>Create or take quizzes made by other students!</p>
 
 <h2>Published Quizzes</h2>
 <div class="quiz-list">
     {% for quiz in published_quizzes %}
-    <a href="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id) }}" class="quiz-card">
-        {% if quiz.image %}<img src="{{ url_for('static', filename=quiz.image) }}" alt="{{ quiz.title }}">{% endif %}
+    <div class="quiz-card">
+        {% if quiz.image %}
+        <img src="{{ url_for('static', filename=quiz.image) }}" alt="{{ quiz.title }}">
+        {% endif %}
         <div class="quiz-card-text">
             <h2>{{ quiz.title }}</h2>
             <p>{{ quiz.description }}</p>
         </div>
-        <a href="{{ url_for('quizzes.view_past_results', quiz_id=quiz.id) }}" class="btn-secondary">
-            My Past Results
-        </a>
-    </a>
+
+        <div class="quiz-card-actions">
+            <a href="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id) }}" class="btn-secondary">Take Quiz</a>
+            <a href="{{ url_for('quizzes.view_past_results', quiz_id=quiz.id) }}" class="btn-secondary">My Past Results</a>
+        </div>
+    </div>
     {% else %}
     <p>No published quizzes yet.</p>
     {% endfor %}
@@ -29,6 +34,7 @@
 
 <h2>Your Quizzes</h2>
 <div class="quiz-list">
+    <!-- Create New Quiz Card -->
     <a href="{{ url_for('quizzes.create_quiz') }}" class="quiz-card create-quiz-card">
         <div class="quiz-card-text">
             <h2>+ Create New Quiz</h2>
@@ -60,27 +66,25 @@
             {% if not quiz.is_published %}<span class="draft-label">Draft</span>{% endif %}
             <p>{{ quiz.description }}</p>
 
-            <a href="{{ url_for('quizzes.edit_quiz', quiz_id=quiz.id) }}" class="back-btn">Edit</a>
+            <div class="quiz-card-actions">
+                <a href="{{ url_for('quizzes.edit_quiz', quiz_id=quiz.id) }}" class="btn-secondary">Edit</a>
+                <form action="{{ url_for('quizzes.delete_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-secondary">Delete</button>
+                </form>
 
-            <form action="{{ url_for('quizzes.delete_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
-                <button type="submit" class="back-btn">Delete</button>
-            </form>
-
-            {% if not quiz.is_published %}
-            <form action="{{ url_for('quizzes.publish_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
-                <button type="submit" class="back-btn tooltip" data-quiz-id="{{ quiz.id }}" disabled>
-                    Publish
-                    <span class="tooltiptext">Checking quiz validity...</span>
-                </button>
-            </form>
-            {% endif %}
-
-            {% if quiz.is_published %}
-            <form action="{{ url_for('quizzes.unpublish_quiz', quiz_id=quiz.id) }}" method="POST"
-                style="display:inline;">
-                <button type="submit" class="back-btn">Unpublish</button>
-            </form>
-            {% endif %}
+                {% if not quiz.is_published %}
+                <form action="{{ url_for('quizzes.publish_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-secondary tooltip" data-quiz-id="{{ quiz.id }}" disabled>
+                        Publish
+                        <span class="tooltiptext">Checking quiz validity...</span>
+                    </button>
+                </form>
+                {% else %}
+                <form action="{{ url_for('quizzes.unpublish_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-secondary">Unpublish</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
     </div>
     {% endfor %}

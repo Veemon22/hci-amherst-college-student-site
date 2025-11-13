@@ -4,7 +4,7 @@ const addQuestionBtn = document.getElementById('add-question-btn');
 const addResultBtn = document.getElementById('add-result-btn');
 const resultsContainer = document.getElementById('results-container');
 
-// --- Add question ---
+// Add question
 addQuestionBtn.addEventListener('click', () => {
     const qDiv = document.createElement('div');
     qDiv.classList.add('question-block');
@@ -21,7 +21,7 @@ addQuestionBtn.addEventListener('click', () => {
     questionIndex++;
 });
 
-// --- Add option / delete option / delete question / delete result ---
+// Add/delete option/question/result
 document.addEventListener('click', e => {
     const qBlock = e.target.closest('.question-block');
     const rBlock = e.target.closest('.result-block');
@@ -36,8 +36,11 @@ document.addEventListener('click', e => {
         oDiv.classList.add('option-block');
         oDiv.innerHTML = `
             <input type="text" name="option_text_${idx}[]" placeholder="Option text" required>
+            <label>Points</label>
             <input type="number" name="option_points_${idx}[]" placeholder="Points" value="1">
-            <label class="correct-label">Correct? <input type="checkbox" name="option_correct_${idx}[]" value="true"></label>
+            <label class="correct-label">Correct?
+                <input type="checkbox" name="option_correct_${idx}[]" value="true">
+            </label>
             <button type="button" class="delete-option-btn">Delete Option</button>
         `;
         optionsContainer.appendChild(oDiv);
@@ -64,7 +67,7 @@ document.addEventListener('click', e => {
     }
 });
 
-// --- Add result range ---
+// Add result
 addResultBtn.addEventListener('click', () => {
     const rDiv = document.createElement('div');
     rDiv.classList.add('result-block');
@@ -78,18 +81,17 @@ addResultBtn.addEventListener('click', () => {
     updateValidation();
 });
 
-// --- Toggle correct checkboxes and points visibility ---
+// Toggle correct checkboxes and points
 function toggleCorrectCheckboxes() {
     const quizType = document.getElementById('quiz_type').value;
     document.querySelectorAll('.option-block').forEach(opt => {
         const checkbox = opt.querySelector('input[type="checkbox"]');
         const pointsInput = opt.querySelector('input[type="number"]');
         const label = opt.querySelector('.correct-label');
-
         if (quizType === 'objective') {
             if (label) label.style.display = 'inline-block';
             if (checkbox && pointsInput) pointsInput.style.display = checkbox.checked ? 'inline-block' : 'none';
-        } else { // subjective
+        } else {
             if (label) label.style.display = 'none';
             if (checkbox) checkbox.checked = false;
             if (pointsInput) pointsInput.style.display = 'inline-block';
@@ -97,7 +99,16 @@ function toggleCorrectCheckboxes() {
     });
 }
 
-// --- Validation ---
+// Dynamically show points on checkbox change
+document.addEventListener('change', e => {
+    if (e.target.type === 'checkbox' && e.target.closest('.option-block')) {
+        const quizType = document.getElementById('quiz_type').value;
+        const pointsInput = e.target.closest('.option-block').querySelector('input[type="number"]');
+        if (quizType === 'objective') pointsInput.style.display = e.target.checked ? 'inline-block' : 'none';
+    }
+});
+
+// Validation and hover tooltip for Save/Publish
 function updateValidation() {
     const questions = document.querySelectorAll('.question-block');
     const saveBtn = document.getElementById('save-quiz-btn');
@@ -105,10 +116,8 @@ function updateValidation() {
     let valid = true;
     let message = '';
 
-    if (questions.length === 0) {
-        valid = false;
-        message = "You must add at least one question.";
-    } else {
+    if (questions.length === 0) { valid = false; message = "You must add at least one question."; }
+    else {
         questions.forEach((q, idx) => {
             const options = q.querySelectorAll('.option-block');
             if (options.length < 2) { valid = false; message = `Question ${idx + 1} has less than 2 options.`; }
@@ -123,10 +132,8 @@ function updateValidation() {
     }
 
     const results = document.querySelectorAll('.result-block');
-    if (results.length === 0) {
-        valid = false;
-        message = "You must add at least one result range.";
-    } else {
+    if (results.length === 0) { valid = false; message = "You must add at least one result range."; }
+    else {
         const ranges = [];
         results.forEach((r, idx) => {
             const min = parseInt(r.querySelector('input[name="result_min[]"]').value || 0);
@@ -140,35 +147,28 @@ function updateValidation() {
         }
     }
 
-    // --- Tooltip handling ---
+    // Apply tooltip to Save/Publish buttons
     [saveBtn, publishBtn].forEach(btn => {
         if (!btn) return;
+        const tip = btn.querySelector('.tooltiptext');
         if (!valid) {
             btn.disabled = true;
             btn.classList.add('tooltip');
-            let tip = btn.querySelector('.tooltiptext');
-            if (!tip) {
-                tip = document.createElement('span');
-                tip.className = 'tooltiptext';
-                btn.appendChild(tip);
-            }
-            tip.textContent = message;
+            if (tip) tip.textContent = message;
         } else {
             btn.disabled = false;
             btn.classList.remove('tooltip');
-            const tip = btn.querySelector('.tooltiptext');
-            if (tip) tip.remove();
+            if (tip) tip.textContent = '';
         }
     });
 }
 
-// --- Event listeners ---
 document.getElementById('quiz-form').addEventListener('input', updateValidation);
 document.getElementById('quiz_type').addEventListener('change', () => {
     toggleCorrectCheckboxes();
     updateValidation();
 });
 
-// --- Initial run ---
+// Initial run
 toggleCorrectCheckboxes();
 updateValidation();

@@ -31,6 +31,7 @@
 
 .quiz-card-text {
     padding: 10px;
+    flex-grow: 1;
 }
 
 .quiz-card-text h2 {
@@ -53,6 +54,7 @@
 .create-quiz-card:hover {
     transform: scale(1.05);
     box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    text-decoration: none;
 }
 
 .create-quiz-card .quiz-card-text h2 {
@@ -103,3 +105,26 @@
     opacity: 1;
 }
 
+.quiz-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+}
+
+.quiz-card-actions .btn-secondary {
+    display: block;
+    text-align: center;
+    padding: 8px 10px;
+    background-color: #5e2a8c;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.quiz-card-actions .btn-secondary:hover {
+    background-color: #4b216b;
+}

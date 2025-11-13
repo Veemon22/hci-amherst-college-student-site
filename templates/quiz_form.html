@@ -19,12 +19,17 @@
     <textarea name="description" id="description">{{ quiz.description if quiz else '' }}</textarea>
 
     <label for="quiz_type">Quiz Type</label>
+    <small class="description">
+        • <strong>Objective:</strong> Students select one or more correct answers.<br>
+        • <strong>Subjective:</strong> Each option awards a set number of points.
+    </small>
     <select name="quiz_type" id="quiz_type">
         <option value="objective" {% if quiz and quiz.quiz_type == 'objective' %}selected{% endif %}>Objective</option>
         <option value="subjective" {% if quiz and quiz.quiz_type == 'subjective' %}selected{% endif %}>Subjective</option>
     </select>
 
     <label for="quiz_image">Quiz Image</label>
+    <small class="description">Optional. Displays at the top of the quiz.</small>
     {% if quiz and quiz.image %}
     <div>
         <img src="{{ url_for('static', filename=quiz.image) }}" alt="Current Quiz Image" class="current-image">
@@ -34,18 +39,23 @@
 
     <!-- Questions -->
     <h2>Questions</h2>
+    <small class="description">Add questions and define the options for each one.</small>
+
     <div id="questions-container">
         {% if quiz %}
             {% for question in quiz.questions %}
             {% set q_idx = loop.index0 %}
             <div class="question-block" data-index="{{ q_idx }}">
                 <input type="hidden" name="question_id_{{ q_idx }}" value="{{ question.id }}">
+
                 <h3>Question {{ loop.index }}</h3>
 
                 <label>Text</label>
+                <small class="description">This is the question students will answer.</small>
                 <input type="text" name="question_text_{{ q_idx }}" value="{{ question.text }}" required>
 
                 <label>Image</label>
+                <small class="description">Optional. Displays below the question.</small>
                 {% if question.image %}
                 <div>
                     <img src="{{ url_for('static', filename=question.image) }}" class="current-image">
@@ -54,58 +64,90 @@
                 <input type="file" name="question_image_{{ q_idx }}" accept="image/*">
 
                 <h4>Options</h4>
+                <small class="description">
+                    For <strong>Objective</strong> quizzes: mark which options are correct.<br>
+                    For <strong>Subjective</strong> quizzes: assign points to each option.
+                </small>
+
                 <div class="options-container">
                     {% for option in question.options %}
                     <div class="option-block">
                         <input type="hidden" name="option_id_{{ q_idx }}[]" value="{{ option.id }}">
+
                         <input type="text" name="option_text_{{ q_idx }}[]" value="{{ option.text }}" placeholder="Option text" required>
-                        <input type="number" name="option_points_{{ q_idx }}[]" value="{{ option.points }}" placeholder="Points">
+
+                        <label>Points</label>
+                        <input type="number" name="option_points_{{ q_idx }}[]" value="{{ option.points }}">
+
                         {% if quiz.quiz_type == 'objective' %}
-                        <label>Correct? <input type="checkbox" name="option_correct_{{ q_idx }}[]" value="true" {% if option.is_correct %}checked{% endif %}></label>
+                        <label class="correct-label">
+                            Correct?
+                            <input type="checkbox" name="option_correct_{{ q_idx }}[]" value="true" {% if option.is_correct %}checked{% endif %}>
+                        </label>
                         {% endif %}
+
                         <button type="button" class="delete-option-btn">Delete Option</button>
                     </div>
                     {% endfor %}
                 </div>
+
                 <button type="button" class="add-option-btn">Add Option</button>
                 <button type="button" class="delete-question-btn">Delete Question</button>
             </div>
             {% endfor %}
         {% endif %}
     </div>
+
     <button type="button" id="add-question-btn">Add Question</button>
 
     <!-- Result ranges -->
     <h2>Result Ranges</h2>
+    <small class="description">
+        These define what result a student sees based on their score.<br>
+        Example: 0–10 points → “You need improvement”
+    </small>
+
     <div id="results-container">
         {% if quiz %}
             {% for result in quiz.results %}
             <div class="result-block">
                 <input type="hidden" name="result_id[]" value="{{ result.id }}">
+
                 <input type="number" name="result_min[]" value="{{ result.min_points }}" placeholder="Min points" required>
                 <input type="number" name="result_max[]" value="{{ result.max_points }}" placeholder="Max points" required>
                 <input type="text" name="result_text[]" value="{{ result.text }}" placeholder="Result text" required>
+
                 <button type="button" class="delete-result-btn">Delete Result</button>
             </div>
             {% endfor %}
         {% endif %}
     </div>
+
     <button type="button" id="add-result-btn">Add Result Range</button>
 
-    <!-- Save Quiz -->
-    <button type="submit" id="save-quiz-btn">Save Quiz</button>
+    <!-- Save Quiz with hover tooltip -->
+    <button type="submit" id="save-quiz-btn" class="tooltip">
+        Save Quiz
+        <span class="tooltiptext"></span>
+    </button>
 
 </form>
 
-<!-- Separate forms for publish/unpublish -->
+<!-- Publish/Unpublish with hover tooltip -->
 {% if quiz %}
     {% if not quiz.is_published %}
     <form method="POST" action="{{ url_for('quizzes.publish_quiz', quiz_id=quiz.id) }}" style="display:inline;">
-        <button type="submit" id="publish-quiz-btn">Publish</button>
+        <button type="submit" id="publish-quiz-btn" class="tooltip">
+            Publish
+            <span class="tooltiptext"></span>
+        </button>
     </form>
     {% else %}
     <form method="POST" action="{{ url_for('quizzes.unpublish_quiz', quiz_id=quiz.id) }}" style="display:inline;">
-        <button type="submit" id="unpublish-quiz-btn">Unpublish</button>
+        <button type="submit" id="unpublish-quiz-btn" class="tooltip">
+            Unpublish
+            <span class="tooltiptext"></span>
+        </button>
     </form>
     {% endif %}
 {% endif %}

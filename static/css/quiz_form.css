@@ -15,7 +15,7 @@
 #quiz-form input[type="text"], #quiz-form input[type="number"], #quiz-form textarea, #quiz-form select {
     width: 100%;
     padding: 10px 12px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 1rem;
@@ -25,6 +25,13 @@
     font-weight: bold;
     display: block;
     margin-bottom: 5px;
+}
+
+small.description {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #444;
 }
 
 /* Question / Option / Result blocks */
@@ -65,7 +72,6 @@
     transform: scale(1.03);
 }
 
-/* Current images */
 .current-image {
     max-width: 200px;
     max-height: 150px;
@@ -73,7 +79,7 @@
     margin-bottom: 10px;
 }
 
-/* Tooltip */
+/* Hover tooltip for Save/Publish buttons */
 .tooltip {
     position: relative;
     display: inline-block;
@@ -89,9 +95,9 @@
     border-radius: 6px;
     padding: 5px;
     position: absolute;
-    z-index: 1;
-    bottom: 125%; 
-    left: 50%; 
+    z-index: 10;
+    bottom: 125%;
+    left: 50%;
     margin-left: -110px;
     opacity: 0;
     transition: opacity 0.3s;

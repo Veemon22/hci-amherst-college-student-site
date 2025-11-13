@@ -1,7 +1,7 @@
 import os
-from flask import Blueprint, render_template, redirect, session, url_for, request, current_app, abort
+from flask import Blueprint, render_template, redirect, url_for, request, current_app, abort
 from werkzeug.utils import secure_filename
-from models import db, User, Quiz, Question, Option, QuizResultRange, QuizResult
+from models import db, Quiz, Question, Option, QuizResultRange, QuizResult
 from utils import get_current_user, login_required
 
 quiz_bp = Blueprint('quizzes', __name__, template_folder='../templates')
