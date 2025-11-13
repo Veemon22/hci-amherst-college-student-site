@@ -4,8 +4,10 @@ attrs==25.4.0
 blinker==1.9.0
 cachetools==6.2.1
 certifi==2025.10.5
+cffi==2.0.0
 charset-normalizer==3.4.4
 click==8.3.0
+cryptography==46.0.3
 Flask==3.1.2
 Flask-DB==0.4.1
 Flask-SQLAlchemy==3.1.1
@@ -30,9 +32,11 @@ proto-plus==1.26.1
 protobuf==6.33.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
+pycparser==2.23
 pyparsing==3.2.5
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
+pytz==2025.2
 requests==2.32.5
 requests-oauthlib==2.0.0
 rsa==4.9.1

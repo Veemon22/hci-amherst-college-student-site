@@ -2,7 +2,6 @@
 from blueprints.calendar import calendar_bp
 from blueprints.pomodoro import pomodoro_bp
 from blueprints.quizzes import quiz_bp
-from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, request, session
 from ics import Calendar as ICSCalendar
@@ -11,7 +10,6 @@ from utils import get_current_user, login_required
 
 import os
 import random
-from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
