@@ -94,7 +94,7 @@
     min-height: 100px;
     position: relative;
     box-sizing: border-box;
-    text-align: center; /* center day numbers */
+    text-align: center;
 }
 
 .calendar-table th {
@@ -109,9 +109,9 @@
 .calendar-table td.today {
     background-color: #5e2a8c;
     color: #fff;
-    border-radius: 8px; /* soft corners */
-    padding: 5px; /* small padding so events don't touch edges */
-    vertical-align: top; /* keep events starting at the top */
+    border-radius: 8px; 
+    padding: 5px; 
+    vertical-align: top; 
 }
 
 /* Keep day number bold and slightly larger */
@@ -123,7 +123,7 @@
 
 /* Events inside today cell: make them readable on dark bg */
 .calendar-table td.today .event {
-    background-color: rgba(255, 255, 255, 0.2); /* slightly transparent white */
+    background-color: rgba(255, 255, 255, 0.2);
     color: #fff;
 }
 
@@ -152,7 +152,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
-    text-align: left; /* event text aligned left for readability */
+    text-align: left; 
 }
 
 .event:hover {

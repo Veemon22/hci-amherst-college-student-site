@@ -3,13 +3,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     quizCards.forEach(card => {
         const publishBtn = card.querySelector('form button[type="submit"].tooltip');
-        if (!publishBtn) return; // skip published/unpublished buttons
+        if (!publishBtn) return;
 
-        // Extract quiz data from DOM (you may need to add data attributes if needed)
+        // Extract quiz data from DOM
         const quizId = publishBtn.dataset.quizId;
-
-        // For simplicity, we rely on the server providing the quiz questions/options/results in a JSON dataset
-        // For example: <div class="quiz-card" data-questions='[...]' data-results='[...]'>
         const questionsData = JSON.parse(card.dataset.questions || "[]");
         const resultsData = JSON.parse(card.dataset.results || "[]");
         const quizType = card.dataset.quizType || "objective";

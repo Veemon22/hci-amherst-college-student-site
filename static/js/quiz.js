@@ -5,7 +5,7 @@ let totalPoints = 0;
 const quizContainer = document.getElementById('quiz-container');
 const quizId = quizContainer.dataset.quizId;
 
-// ✅ Calculate total possible points directly from DOM
+// Calculate total possible points directly from DOM
 let totalPossiblePoints = 0;
 document.querySelectorAll('.question-block').forEach(q => {
     const optionPoints = Array.from(q.querySelectorAll('.option-btn')).map(
@@ -63,7 +63,7 @@ function showResult() {
     const scoreDisplay = document.getElementById('score-display');
     const resultImage = document.getElementById('result-image');
 
-    // ✅ Display user's result
+    // Display user's result
     if (matchedResult) {
         resultTitle.textContent = matchedResult.dataset.text;
         scoreDisplay.textContent = `You scored ${totalPoints} out of ${totalPossiblePoints} points.`;
@@ -77,7 +77,7 @@ function showResult() {
         scoreDisplay.textContent = `You scored ${totalPoints} out of ${totalPossiblePoints}.`;
     }
 
-    // ✅ Show all possible result ranges
+    // Show all possible result ranges
     const allResultsList = document.getElementById('all-results-list');
     allResultsList.innerHTML = '';
     resultElements.forEach(r => {
@@ -93,7 +93,7 @@ function showResult() {
         allResultsList.appendChild(li);
     });
 
-    // ✅ Send result to backend for storage
+    // Send result to backend for storage
     if (quizId) {
         fetch(`/quiz/${quizId}/submit`, {
             method: "POST",

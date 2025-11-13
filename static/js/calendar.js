@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteConfirmText = document.getElementById("delete-confirm-text");
     const saveEventBtn = document.getElementById("save-event-btn");
 
-    const modalTitleInput = document.getElementById("modal-title-input"); // New input for editable title
+    const modalTitleInput = document.getElementById("modal-title-input");
     const modalTimeInput = document.getElementById("modal-time-input");
     const modalDescriptionInput = document.getElementById("modal-description-input");
 

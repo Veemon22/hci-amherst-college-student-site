@@ -74,7 +74,7 @@ class Pomodoro(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False, default=db.func.now())
     end_time = db.Column(db.DateTime, nullable=True)
-    duration_minutes = db.Column(db.Integer)  # Actual session duration (can pull from user config)
+    duration_minutes = db.Column(db.Integer) 
     timer_type = db.Column(db.String(20), default='work')  # 'work', 'short_break', 'long_break'
     completed = db.Column(db.Boolean, default=False)
 
