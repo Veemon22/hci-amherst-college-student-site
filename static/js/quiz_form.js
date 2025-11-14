@@ -111,46 +111,112 @@ document.addEventListener('change', e => {
 // Validation and hover tooltip for Save/Publish
 function updateValidation() {
     const questions = document.querySelectorAll('.question-block');
+    const results = document.querySelectorAll('.result-block');
+
     const saveBtn = document.getElementById('save-quiz-btn');
-    const publishBtn = document.getElementById('publish-quiz-btn') || document.getElementById('unpublish-quiz-btn');
+    const publishBtn = document.getElementById('publish-quiz-btn');
+
     let valid = true;
     let message = '';
 
-    if (questions.length === 0) { valid = false; message = "You must add at least one question."; }
-    else {
-        questions.forEach((q, idx) => {
-            const options = q.querySelectorAll('.option-block');
-            if (options.length < 2) { valid = false; message = `Question ${idx + 1} has less than 2 options.`; }
-            if (options.length > 4) { valid = false; message = `Question ${idx + 1} has more than 4 options.`; }
+    const quizType = document.getElementById('quiz_type').value;
 
-            const quizType = document.getElementById('quiz_type').value;
+    // ----------------------------
+    // 1. Validate Questions
+    // ----------------------------
+    if (valid && questions.length === 0) {
+        valid = false;
+        message = "You must add at least one question.";
+    }
+
+    if (valid) {
+        questions.forEach((q, idx) => {
+            if (!valid) return;
+
+            const options = q.querySelectorAll('.option-block');
+
+            if (options.length < 2) {
+                valid = false;
+                message = `Question ${idx + 1} has less than 2 options.`;
+                return;
+            }
+
+            if (options.length > 4) {
+                valid = false;
+                message = `Question ${idx + 1} has more than 4 options.`;
+                return;
+            }
+
             if (quizType === 'objective') {
-                const hasCorrect = Array.from(options).some(opt => opt.querySelector('input[type="checkbox"]')?.checked);
-                if (!hasCorrect) { valid = false; message = `Question ${idx + 1} must have at least one correct option.`; }
+                const hasCorrect = Array.from(options)
+                    .some(opt => opt.querySelector('input[type="checkbox"]')?.checked);
+
+                if (!hasCorrect) {
+                    valid = false;
+                    message = `Question ${idx + 1} must have at least one correct option.`;
+                }
             }
         });
     }
 
-    const results = document.querySelectorAll('.result-block');
-    if (results.length === 0) { valid = false; message = "You must add at least one result range."; }
-    else {
+    // ----------------------------
+    // 2. Validate Result Ranges
+    // ----------------------------
+    if (valid && results.length === 0) {
+        valid = false;
+        message = "You must add at least one result range.";
+    }
+
+    if (valid) {
         const ranges = [];
+
         results.forEach((r, idx) => {
-            const min = parseInt(r.querySelector('input[name="result_min[]"]').value || 0);
-            const max = parseInt(r.querySelector('input[name="result_max[]"]').value || 0);
-            if (min > max) { valid = false; message = `Result range ${idx + 1} has min > max.`; }
-            ranges.push({min, max});
+            if (!valid) return;
+
+            const minInput = r.querySelector('input[name="result_min[]"]');
+            const maxInput = r.querySelector('input[name="result_max[]"]');
+
+            const min = parseInt(minInput.value);
+            const max = parseInt(maxInput.value);
+
+            if (isNaN(min) || isNaN(max)) {
+                valid = false;
+                message = `Result range ${idx + 1} must have both min and max.`;
+                return;
+            }
+
+            if (min > max) {
+                valid = false;
+                message = `Result range ${idx + 1} has min greater than max.`;
+                return;
+            }
+
+            ranges.push({ min, max, index: idx + 1 });
         });
-        ranges.sort((a,b) => a.min - b.min);
-        for (let i = 0; i < ranges.length - 1; i++) {
-            if (ranges[i].max >= ranges[i+1].min) { valid = false; message = `Result ranges ${i+1} and ${i+2} overlap.`; }
+
+        // Sort ranges by minimum value
+        ranges.sort((a, b) => a.min - b.min);
+
+        // Check for overlaps
+        for (let i = 0; i < ranges.length - 1 && valid; i++) {
+            const current = ranges[i];
+            const next = ranges[i + 1];
+
+            // Overlap occurs if max > next.min (NOT >=)
+            if (current.max > next.min) {
+                valid = false;
+                message = `Result ranges ${current.index} and ${next.index} overlap.`;
+            }
         }
     }
 
-    // Apply tooltip to Save/Publish buttons
+    // ----------------------------
+    // 3. Apply Button States / Tooltips
+    // ----------------------------
     [saveBtn, publishBtn].forEach(btn => {
         if (!btn) return;
         const tip = btn.querySelector('.tooltiptext');
+
         if (!valid) {
             btn.disabled = true;
             btn.classList.add('tooltip');
@@ -162,13 +228,3 @@ function updateValidation() {
         }
     });
 }
-
-document.getElementById('quiz-form').addEventListener('input', updateValidation);
-document.getElementById('quiz_type').addEventListener('change', () => {
-    toggleCorrectCheckboxes();
-    updateValidation();
-});
-
-// Initial run
-toggleCorrectCheckboxes();
-updateValidation();

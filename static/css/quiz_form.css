@@ -108,6 +108,10 @@ small.description {
     opacity: 1;
 }
 
+.tooltiptext:empty{
+    display: none;
+}
+
 /* Responsive */
 @media(max-width: 600px) {
     .options-container .option-block {
