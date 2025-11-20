@@ -5,15 +5,16 @@ from blueprints.quizzes import quiz_bp
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, request, session
 from ics import Calendar as ICSCalendar
-from models import db, Event, User
+from models import db, Event, User, Quiz, Question, Option, QuizResultRange
 from utils import get_current_user, login_required
+from quiz_data import quizzes
 
 import os
 import random
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
 
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'supersecretkey')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads', 'quiz_images')
@@ -35,9 +36,67 @@ animals = [
     "Lion", "Panda", "Rabbit", "Tiger", "Zebra"
 ]
 
+def initial_data():
+    admin_username = os.getenv('ADMIN_USERNAME')
+
+    if User.query.filter_by(username=admin_username).first() is not None:
+        return
+    
+    # Create admin user
+    admin = User(username=admin_username)
+    db.session.add(admin)
+    db.session.commit()
+
+    for key, quiz_info in quizzes.items():
+        quiz = Quiz(
+            title=quiz_info["title"],
+            description=quiz_info["description"],
+            image=quiz_info.get("image"),
+            quiz_type=quiz_info.get("quiz_type", "objective"),
+            created_by=admin.id,
+            is_published=True
+        )
+        db.session.add(quiz)
+        db.session.commit()
+
+        # Add questions and options
+        for q in quiz_info["questions"]:
+            question = Question(
+                text=q["question"],
+                image=q.get("image"),
+                quiz_id=quiz.id
+            )
+            db.session.add(question)
+            db.session.commit()
+
+            for opt in q["options"]:
+                option = Option(
+                    text=opt["text"],
+                    points=opt.get("points", 0),
+                    is_correct=opt.get("is_correct", False),
+                    question_id=question.id
+                )
+                db.session.add(option)
+
+            db.session.commit()
+
+        # Add results
+        for res in quiz_info["results"]:
+            result = QuizResultRange(
+                min_points=res["min_points"],
+                max_points=res["max_points"],
+                text=res["text"],
+                quiz_id=quiz.id
+            )
+            db.session.add(result)
+
+        db.session.commit()   
+
 db.init_app(app)
 with app.app_context():
     db.create_all()
+    initial_data()
+    
 
 
 # ---------- Routes ----------

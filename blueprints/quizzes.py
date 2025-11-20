@@ -282,7 +282,7 @@ def submit_quiz(quiz_id):
     db.session.add(quiz_result)
     db.session.commit()
 
-    return {"message": "Result saved successfully!"}, 200
+    return '', 200
 
 
 @quiz_bp.route("/quiz/<int:quiz_id>/results")
