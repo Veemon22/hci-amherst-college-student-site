@@ -15,6 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalTimeInput = document.getElementById("modal-time-input");
     const modalDescriptionInput = document.getElementById("modal-description-input");
 
+    // --- Day Overview Modal Elements ---
+    const dayOverviewModal = document.getElementById("dayOverviewModal");
+    const closeDayOverviewBtn = document.getElementById("close-day-overview-modal");
+    const dayOverviewTitle = document.getElementById("day-overview-title");
+    const dayOverviewEvents = document.getElementById("day-overview-events");
+    const addEventFromDayBtn = document.getElementById("add-event-from-day");
+    let selectedDay = null;
+
     // --- Add Event Modal ---
     if (openAddEventBtn && addEventModal) {
         openAddEventBtn.addEventListener("click", () => {
@@ -123,12 +131,93 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
     // --- Delete Modal Close Logic ---
     if (closeDeleteBtn) closeDeleteBtn.addEventListener("click", () => deleteModal.classList.add("hidden"));
     if (cancelDeleteBtn) cancelDeleteBtn.addEventListener("click", () => deleteModal.classList.add("hidden"));
     window.addEventListener("click", (e) => {
         if (e.target === deleteModal) deleteModal.classList.add("hidden");
+    });
+
+    // --- Day Overview Modal Logic ---
+    // Make day cells clickable
+    document.querySelectorAll('.calendar-table td:not(.empty-day)').forEach(cell => {
+        const dayNumber = cell.querySelector('.day-number');
+        if (dayNumber) {
+            dayNumber.style.cursor = 'pointer';
+            dayNumber.style.textDecoration = 'underline';
+            
+            dayNumber.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const day = parseInt(dayNumber.textContent);
+                showDayOverview(day, cell);
+            });
+        }
+    });
+
+    function showDayOverview(day, cell) {
+        selectedDay = day;
+        
+        const headerText = document.querySelector('.calendar-header h2').textContent;
+        const [month, year] = headerText.split('/');
+        
+        dayOverviewTitle.textContent = `Events for ${month}/${day}/${year}`;
+        
+        const events = cell.querySelectorAll('.event');
+        
+        dayOverviewEvents.innerHTML = '';
+        
+        if (events.length === 0) {
+            dayOverviewEvents.innerHTML = '<div class="no-events-message">No events scheduled for this day</div>';
+        } else {
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'day-event-item';
+                
+                const title = event.getAttribute('data-title');
+                const time = event.getAttribute('data-time');
+                const description = event.getAttribute('data-description');
+                
+                eventDiv.innerHTML = `
+                    <div class="day-event-time">${time}</div>
+                    <div class="day-event-title">${title}</div>
+                    <div class="day-event-description">${description}</div>
+                `;
+                
+                eventDiv.addEventListener('click', () => {
+                    dayOverviewModal.classList.add('hidden');
+                    showEventModal(event);
+                });
+                
+                dayOverviewEvents.appendChild(eventDiv);
+            });
+        }
+        
+        dayOverviewModal.classList.remove('hidden');
+    }
+
+    if (closeDayOverviewBtn) {
+        closeDayOverviewBtn.addEventListener('click', () => {
+            dayOverviewModal.classList.add('hidden');
+        });
+    }
+
+    if (addEventFromDayBtn) {
+        addEventFromDayBtn.addEventListener('click', () => {
+            dayOverviewModal.classList.add('hidden');
+            
+            const headerText = document.querySelector('.calendar-header h2').textContent;
+            const [month, year] = headerText.split('/');
+            const dateString = `${year}-${month.padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
+            
+            document.querySelector('#add-event-form input[name="date"]').value = dateString;
+            addEventModal.classList.remove('hidden');
+        });
+    }
+
+    window.addEventListener('click', (e) => {
+        if (e.target === dayOverviewModal) {
+            dayOverviewModal.classList.add('hidden');
+        }
     });
 });
 

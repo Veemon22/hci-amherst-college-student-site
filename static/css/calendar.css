@@ -15,13 +15,14 @@
     max-width: 1200px;
     margin: 40px auto;
     padding: 20px;
-    background: #efe6fa;
+    background: linear-gradient(135deg, #f8f5fb 0%, #f0e6fa 100%);
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(94, 42, 140, 0.15);
     display: flex;
     flex-direction: column;
     min-height: 600px;
     box-sizing: border-box;
+    border: 2px solid #e4d5f4;
 }
 
 /* --- Calendar Actions --- */
@@ -51,11 +52,12 @@
 }
 
 .gcal-connected {
-    display: flex;
+    display: block;
+    flex-direction: column;
     align-items: center;
     gap: 10px;
     font-weight: bold;
-    color: green;
+    color: #2d7d3a;
     flex-wrap: wrap;
 }
 
@@ -72,6 +74,7 @@
     font-size: 1.6rem;
     margin: 0;
     flex-grow: 1;
+    color: #5e2a8c;
 }
 
 .calendar-nav-btn {
@@ -94,11 +97,15 @@
     border-collapse: collapse;
     flex-grow: 1;
     table-layout: fixed;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(94, 42, 140, 0.1);
 }
 
 .calendar-table th,
 .calendar-table td {
-    border: 1px solid #ccc;
+    border: 1px solid #e4d5f4;
     width: 14.28%;
     vertical-align: top;
     padding: 8px;
@@ -106,23 +113,31 @@
     position: relative;
     box-sizing: border-box;
     text-align: center;
+    background-color: #ffffff;
 }
 
 .calendar-table th {
-    background-color: #d9c8f0;
+    background: linear-gradient(180deg, #7b3ab8 0%, #5e2a8c 100%);
     font-weight: bold;
+    color: #ffffff;
+    padding: 12px 8px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
 }
 
 .empty-day {
-    background-color: #e1d6f0;
+    background-color: #faf8fc;
 }
+
 /* Full-cell highlight for today */
 .calendar-table td.today {
-    background-color: #5e2a8c;
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
     color: #fff;
     border-radius: 8px; 
     padding: 5px; 
-    vertical-align: top; 
+    vertical-align: top;
+    box-shadow: 0 0 0 3px rgba(94, 42, 140, 0.2);
 }
 
 /* Keep day number bold and slightly larger */
@@ -134,40 +149,50 @@
 
 /* Events inside today cell: make them readable on dark bg */
 .calendar-table td.today .event {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #5e2a8c;
+    border-left-color: #ffffff;
 }
 
 .calendar-table td.today .event:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: #ffffff;
 }
 
 .day-number {
     font-weight: bold;
     margin-bottom: 6px;
     display: block;
+    color: #5e2a8c;
+}
+
+.calendar-table td.today .day-number {
+    color: #ffffff;
 }
 
 /* --- Events --- */
 .event {
-    background-color: #f0e6fa;
+    background: linear-gradient(135deg, #f8f5fb 0%, #f0e6fa 100%);
     color: #5e2a8c;
-    padding: 3px 6px;
+    padding: 4px 8px;
     margin: 3px 0;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
     text-align: left; 
+    border-left: 3px solid #7b3ab8;
+    box-shadow: 0 1px 3px rgba(94, 42, 140, 0.1);
 }
 
 .event:hover {
-    background-color: #d9c8f0;
+    background: linear-gradient(135deg, #e4d5f4 0%, #d9c8f0 100%);
+    transform: translateX(2px);
+    box-shadow: 0 2px 6px rgba(94, 42, 140, 0.2);
 }
 
 /* Make table cells scrollable if too many events */
@@ -179,18 +204,20 @@
 #open-add-event-modal {
     margin: 20px auto;
     display: block;
-    padding: 10px 16px;
-    background-color: #5e2a8c;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 10px rgba(94, 42, 140, 0.3);
 }
 
 #open-add-event-modal:hover {
-    background-color: #4b216b;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(94, 42, 140, 0.4);
 }
 
 /* --- Modals --- */
@@ -200,7 +227,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -213,15 +240,16 @@
 
 .modal-content {
     background: white;
-    padding: 20px;
+    padding: 30px;
     border-radius: 12px;
     width: 90%;
     max-width: 400px;
     text-align: center;
-    box-shadow: 0 0 15px rgba(0,0,0,0.25);
+    box-shadow: 0 8px 30px rgba(94, 42, 140, 0.3);
     position: relative;
     max-height: 90vh;
     overflow-y: auto;
+    border: 2px solid #e4d5f4;
 }
 
 /* Modal close button */
@@ -236,7 +264,7 @@
 }
 
 .close-btn:hover {
-    color: #4b216b;
+    color: #7b3ab8;
 }
 
 /* --- Add / Edit Event Form --- */
@@ -258,35 +286,49 @@
 #addEventModal label,
 #eventModal label {
     font-weight: bold;
+    color: #5e2a8c;
 }
 
 #addEventModal input,
 #addEventModal textarea,
 #eventModal input,
 #eventModal textarea {
-    padding: 8px;
-    border: 1px solid #ccc;
+    padding: 10px;
+    border: 2px solid #e4d5f4;
     border-radius: 6px;
     font-size: 1rem;
     width: 100%;
     box-sizing: border-box;
+    transition: border-color 0.2s ease;
+    background-color: #faf8fc;
+}
+
+#addEventModal input:focus,
+#addEventModal textarea:focus,
+#eventModal input:focus,
+#eventModal textarea:focus {
+    outline: none;
+    border-color: #7b3ab8;
+    background-color: #ffffff;
 }
 
 #addEventModal .submit-btn,
 #eventModal .submit-btn {
     padding: 10px 16px;
-    background-color: #5e2a8c;
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
     color: #fff;
     border: none;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(94, 42, 140, 0.3);
 }
 
 #addEventModal .submit-btn:hover,
 #eventModal .submit-btn:hover {
-    background-color: #4b216b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(94, 42, 140, 0.4);
 }
 
 /* --- Modal Buttons Container --- */
@@ -297,3 +339,80 @@
     margin-top: 15px;
 }
 
+.cancel-btn {
+    padding: 10px 16px;
+    background-color: #e4d5f4;
+    color: #5e2a8c;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #d9c8f0;
+}
+
+.confirm-btn {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(94, 42, 140, 0.3);
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(94, 42, 140, 0.4);
+}
+
+/* --- Day Overview Modal --- */
+#day-overview-events {
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: left;
+    margin: 20px 0;
+}
+
+.day-event-item {
+    background-color: #f8f5fb;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border-left: 3px solid #7b3ab8;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.day-event-item:hover {
+    background-color: #f0e6fa;
+}
+
+.day-event-time {
+    font-weight: bold;
+    color: #5e2a8c;
+    margin-bottom: 4px;
+}
+
+.day-event-title {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.day-event-description {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.no-events-message {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+    font-style: italic;
+}

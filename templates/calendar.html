@@ -20,7 +20,7 @@
         </form>
     {% else %}
         <div class="gcal-connected">
-            <span>✅ Google Calendar Connected</span>
+            <h1>✅ Google Calendar Connected</h1>
             <form action="{{ url_for('calendar.calendar') }}" method="get" style="display:inline;">
                 <button type="submit" class="calendar-btn refresh-btn">
                     Refresh Google Events
@@ -123,10 +123,8 @@
                 <input type="time" name="time" step="60" required>
 
                 {% if session.get('gcal_credentials') %}
-                <label>
-                    <input type="checkbox" name="sync_to_gcal">
-                    Also add to Google Calendar
-                </label>
+                <label style="text-align: center;" >Add to Google Calendar?</label>
+                <input type="checkbox" name="add_to_gcal" value="yes">
                 {% endif %}
                 <button type="submit" class="submit-btn">Add Event</button>
             </form>
@@ -199,6 +197,18 @@
                 </form>
                 <button id="cancel-import-btn" class="cancel-btn">Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Day Overview Modal -->
+    <div id="dayOverviewModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-day-overview-modal" class="close-btn">&times;</span>
+            <h3 id="day-overview-title">Events for [Date]</h3>
+            <div id="day-overview-events">
+                <!-- Events will be populated here -->
+            </div>
+            <button id="add-event-from-day" class="submit-btn">Add Event to This Day</button>
         </div>
     </div>
 
