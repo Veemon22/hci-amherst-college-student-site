@@ -2,7 +2,12 @@
 
 {% block title %}Dining - Amherst College Student{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dining.css') }}">
+{% endblock %}
+
 {% block content %}
-    <iframe src="https://amherst.nutrislice.com/menu/valentine-hall" style="width:100%; height:800px; border:none;">
-    </iframe>
+<div class="dining-page">
+    <iframe class="dining-core" src="https://amherst.nutrislice.com/menu/valentine-hall" loading="lazy"></iframe>
+</div>
 {% endblock %}

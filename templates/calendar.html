@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="calendar-page">
 <h1>Your Calendar</h1>
 <p>Welcome, {{ username }}! Here is your personalized calendar. We have our own database for Calendar events but feel free to connect your google account.</p>
 
@@ -103,6 +104,8 @@
     </table>
 
     <button id="open-add-event-modal">Add Event</button>
+
+</div>
 
     <div id="addEventModal" class="modal hidden">
         <div class="modal-content">

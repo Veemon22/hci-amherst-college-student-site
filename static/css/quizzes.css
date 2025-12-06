@@ -1,3 +1,14 @@
+.quizzes-page{
+     background-color: white;
+    text-align: center;
+    min-height: 100vh;
+    padding: 20px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.6s ease;
+}
+
 .quiz-list {
     display: flex;
     flex-wrap: wrap;

@@ -11,6 +11,10 @@
 #quiz-form h1, #quiz-form h2, #quiz-form h3, #quiz-form h4 {
     color: #5e2a8c;
 }
+.quiz-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
 #quiz-form input[type="text"], #quiz-form input[type="number"], #quiz-form textarea, #quiz-form select {
     width: 100%;

@@ -7,9 +7,9 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ quiz.title if quiz else "Create a New Quiz" }}</h1>
 
 <form method="POST" enctype="multipart/form-data" id="quiz-form">
+    <h1 class="quiz-title">{{ quiz.title if quiz else "Create a New Quiz" }}</h1>
 
     <!-- Quiz metadata -->
     <label for="title">Quiz Title</label>
