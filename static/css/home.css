@@ -61,13 +61,13 @@
     padding: 30px 20px;
     text-decoration: none;
     color: inherit;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s, border-color 0.25s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     max-width: 280px;
     min-height: 240px;
-    border: 1px solid rgba(94, 42, 140, 0.08);
+    border: 2px solid rgba(94, 42, 140, 0.08);
 }
 
 .feature-card:hover {
@@ -75,6 +75,7 @@
     box-shadow: 0 10px 18px rgba(94,42,140,0.15);
     background: #faf4ff;
     text-decoration: none;
+    border-color: #7b3ab8;
 }
 
 /* --- Icon circle --- */
@@ -111,4 +112,3 @@
     line-height: 1.4;
     margin: 0;
 }
-

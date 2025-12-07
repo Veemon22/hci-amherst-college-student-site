@@ -6,35 +6,30 @@
 {% endblock %}
 
 {% block content %}
-<div class="home-container">
-  <div class="home-inner">
-    <h1>Pomodoro Timer Setup</h1>
+<div class="pomodoro-form-page">
+    <h1>⚙️ Pomodoro Timer Setup</h1>
     <p>Hi {{ username }}, configure your personal Pomodoro settings or use the defaults below.</p>
 
     <form method="POST" class="pomodoro-form">
-      <div class="form-group">
-        <label for="work">Work Duration (minutes)</label>
-        <input type="number" id="work" name="work" value="{{ config.work }}" min="1" required>
-      </div>
+        <div class="form-group">
+            <label for="work">💼 Work Duration (minutes)</label>
+            <input type="number" id="work" name="work" value="{{ config.work }}" min="1" required>
+        </div>
 
-      <div class="form-group">
-        <label for="short_break">Short Break (minutes)</label>
-        <input type="number" id="short_break" name="short_break" value="{{ config.short_break }}" min="1" required>
-      </div>
+        <div class="form-group">
+            <label for="short_break">☕ Short Break (minutes)</label>
+            <input type="number" id="short_break" name="short_break" value="{{ config.short_break }}" min="1" required>
+        </div>
 
-      <div class="form-group">
-        <label for="long_break">Long Break (minutes)</label>
-        <input type="number" id="long_break" name="long_break" value="{{ config.long_break }}" min="1" required>
-      </div>
+        <div class="form-group">
+            <label for="long_break">🌟 Long Break (minutes)</label>
+            <input type="number" id="long_break" name="long_break" value="{{ config.long_break }}" min="1" required>
+        </div>
 
-      <div class="form-buttons">
-        <button type="submit" class="btn">Save Settings</button>
-        <a href="{{ url_for('pomodoro.pomodoro') }}" class="btn secondary">Back to Pomodoro</a>
-      </div>
+        <div class="form-buttons">
+            <button type="submit" class="btn">Save Settings</button>
+            <a href="{{ url_for('pomodoro.pomodoro') }}" class="btn secondary">Back to Pomodoro</a>
+        </div>
     </form>
-  </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
 {% endblock %}

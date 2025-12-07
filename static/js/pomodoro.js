@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const completeBtn = document.getElementById("complete-btn");
   const phaseButtons = document.querySelectorAll(".phase-btn");
 
-  const timerElement = document.querySelector(".pomodoro-timer");
+  const timerElement = document.querySelector(".timer-card");
   const WORK = parseInt(timerElement.dataset.work) * 60;
   const SHORT = parseInt(timerElement.dataset.shortBreak) * 60;
   const LONG = parseInt(timerElement.dataset.longBreak) * 60;
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function formatTime(sec) {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
-    return `${m}:${s < 10 ? "0" + s : s}`;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
 
   function updateDisplay() {

@@ -6,121 +6,167 @@
 {% endblock %}
 
 {% block content %}
-<div class="pomodoro-container">
-    <h1>Pomodoro Timer</h1>
-    <p>Welcome, {{ username }} 👋</p>
-
-    <!-- Phase Buttons -->
-    <div class="phase-buttons">
-        <button class="phase-btn {% if config.current_type == 'work' %}active{% endif %}"
-            data-phase="work">Work</button>
-        <button class="phase-btn {% if config.current_type == 'short_break' %}active{% endif %}"
-            data-phase="short_break">Short Break</button>
-        <button class="phase-btn {% if config.current_type == 'long_break' %}active{% endif %}"
-            data-phase="long_break">Long Break</button>
+<div class="pomodoro-page">
+    <div class="pomodoro-header">
+        <h1>🍅 Pomodoro Timer</h1>
+        <p>Welcome, {{ username }}! Stay focused and productive.</p>
     </div>
 
-    <!-- Timer -->
-    <div class="pomodoro-timer" data-work="{{ config.work }}" data-short-break="{{ config.short_break }}"
-        data-long-break="{{ config.long_break }}" data-current-type="{{ config.current_type }}">
-        <h2 id="timer-label">{{ config.current_type|replace('_', ' ')|title }}</h2>
-        <div id="timer-display">00:00</div>
-    </div>
-
-    <!-- Actions -->
-    <div class="pomodoro-actions">
-        <button id="start-btn">Start</button>
-
-        <form method="POST" style="display:inline;">
-            <input type="hidden" name="action" value="complete_pomodoro">
-            <button type="submit" id="complete-btn">
-                {% if config.current_type == 'work' %}Complete Work{% else %}Complete Break{% endif %}
+    <div class="pomodoro-main">
+        <!-- Phase Selection -->
+        <div class="phase-selector">
+            <button class="phase-btn {% if config.current_type == 'work' %}active{% endif %}"
+                data-phase="work">
+                <span class="phase-icon">💼</span>
+                <span>Work</span>
             </button>
-        </form>
+            <button class="phase-btn {% if config.current_type == 'short_break' %}active{% endif %}"
+                data-phase="short_break">
+                <span class="phase-icon">☕</span>
+                <span>Short Break</span>
+            </button>
+            <button class="phase-btn {% if config.current_type == 'long_break' %}active{% endif %}"
+                data-phase="long_break">
+                <span class="phase-icon">🌟</span>
+                <span>Long Break</span>
+            </button>
+        </div>
 
-        <a href="{{ url_for('pomodoro.pomodoro_form') }}" class="btn secondary">Settings</a>
+        <!-- Timer Display -->
+        <div class="timer-card" data-work="{{ config.work }}" data-short-break="{{ config.short_break }}"
+            data-long-break="{{ config.long_break }}" data-current-type="{{ config.current_type }}">
+            <h2 id="timer-label">{{ config.current_type|replace('_', ' ')|title }}</h2>
+            <div id="timer-display">00:00</div>
+            <div class="timer-controls">
+                <button id="start-btn" class="control-btn primary">Start</button>
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="complete_pomodoro">
+                    <button type="submit" id="complete-btn" class="control-btn success">
+                        {% if config.current_type == 'work' %}Complete Work{% else %}Complete Break{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="stats-card">
+            <div class="stat-item">
+                <div class="stat-label">Pomodoros Completed</div>
+                <div class="stat-value" id="pomodoros-completed">{{ user.pomodoros_completed }}</div>
+            </div>
+            <a href="{{ url_for('pomodoro.pomodoro_form') }}" class="settings-btn">⚙️ Settings</a>
+        </div>
     </div>
 
-    <!-- Pomodoros Completed -->
-    <div class="pomodoro-stats">
-        <h3>Number of Pomodoros Completed</h3>
-        <p id="pomodoros-completed">{{ user.pomodoros_completed }}</p>
-    </div>
-
-    <!-- Active Tasks -->
-    <div class="pomodoro-tasks">
-        <h3>Add Task</h3>
-        <form method="POST" class="add-task-form">
-            <input type="hidden" name="action" value="add_task">
-            <input type="text" name="title" placeholder="Task title" required>
-            <input type="text" name="note" placeholder="Optional note">
-            <input type="number" name="estimated_pomodoros" placeholder="Estimated Pomodoros" min="1" value="1">
-            <select name="priority">
-                <option value="0">Normal</option>
-                <option value="1">High</option>
-                <option value="2">Urgent</option>
-            </select>
-            <button type="submit" class="btn">Add Task</button>
-        </form>
-
-        <h3>Active Tasks</h3>
-        {% set active_tasks = tasks | selectattr('completed', 'equalto', False) | list %}
-        {% if active_tasks %}
-        <ul class="task-list">
-            {% for task in active_tasks %}
-            <li>
-                <strong>{{ task.title }}</strong>
-                {% if task.note %}- {{ task.note }}{% endif %}
-                <em>
-                    ({{ task.completed_pomodoros }}/{{ task.estimated_pomodoros }} Pomodoros,
-                    {% if task.priority == 1 %}High{% elif task.priority == 2 %}Urgent{% else %}Normal{% endif %})
-                </em>
-                <div class="task-actions">
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="action" value="complete_task">
-                        <input type="hidden" name="task_id" value="{{ task.id }}">
-                        <button type="submit" class="btn small-btn">✔</button>
-                    </form>
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="action" value="delete_task">
-                        <input type="hidden" name="task_id" value="{{ task.id }}">
-                        <button type="submit" class="btn small-btn">🗑</button>
-                    </form>
+    <!-- Task Management -->
+    <div class="task-section">
+        <h2>📋 Task Management</h2>
+        
+        <!-- Add Task Form -->
+        <div class="add-task-card">
+            <h3>Add New Task</h3>
+            <form method="POST" class="add-task-form">
+                <input type="hidden" name="action" value="add_task">
+                <div class="form-row">
+                    <input type="text" name="title" placeholder="Task title" required class="form-input">
+                    <input type="text" name="note" placeholder="Optional note" class="form-input">
                 </div>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="empty-message">No active tasks. Add a new task above!</p>
+                <div class="form-row">
+                    <input type="number" name="estimated_pomodoros" placeholder="Estimated Pomodoros" 
+                           min="1" value="1" class="form-input small">
+                    <select name="priority" class="form-input small">
+                        <option value="0">Normal Priority</option>
+                        <option value="1">High Priority</option>
+                        <option value="2">Urgent Priority</option>
+                    </select>
+                    <button type="submit" class="btn-add-task">+ Add Task</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Active Tasks -->
+        <div class="tasks-container">
+            <h3>Active Tasks</h3>
+            {% set active_tasks = tasks | selectattr('completed', 'equalto', False) | list %}
+            {% if active_tasks %}
+            <ul class="task-list">
+                {% for task in active_tasks %}
+                <li class="task-item priority-{{ task.priority }}">
+                    <div class="task-content">
+                        <div class="task-header">
+                            <strong class="task-title">{{ task.title }}</strong>
+                            <span class="priority-badge priority-{{ task.priority }}">
+                                {% if task.priority == 2 %}🔥 Urgent
+                                {% elif task.priority == 1 %}⚡ High
+                                {% else %}📌 Normal
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if task.note %}
+                        <p class="task-note">{{ task.note }}</p>
+                        {% endif %}
+                        <div class="task-meta">
+                            <span class="pomodoro-count">
+                                🍅 {{ task.completed_pomodoros }}/{{ task.estimated_pomodoros }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="complete_task">
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <button type="submit" class="action-btn complete" title="Mark as complete">✓</button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_task">
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <button type="submit" class="action-btn delete" title="Delete task">×</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <p>No active tasks. Add a new task above to get started!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Completed Tasks -->
+        {% set completed_tasks = tasks | selectattr('completed', 'equalto', True) | list %}
+        {% if completed_tasks %}
+        <div class="tasks-container completed">
+            <h3>✅ Completed Tasks</h3>
+            <ul class="task-list">
+                {% for task in completed_tasks %}
+                <li class="task-item completed">
+                    <div class="task-content">
+                        <div class="task-header">
+                            <strong class="task-title">{{ task.title }}</strong>
+                        </div>
+                        {% if task.note %}
+                        <p class="task-note">{{ task.note }}</p>
+                        {% endif %}
+                        <div class="task-meta">
+                            <span class="pomodoro-count">
+                                🍅 {{ task.completed_pomodoros }}/{{ task.estimated_pomodoros }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_task">
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <button type="submit" class="action-btn delete" title="Delete task">×</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
     </div>
-
-    <!-- Completed Tasks -->
-    {% set completed_tasks = tasks | selectattr('completed', 'equalto', True) | list %}
-    {% if completed_tasks %}
-    <div class="completed-tasks">
-        <h3>Completed Tasks</h3>
-        <ul class="task-list completed">
-            {% for task in completed_tasks %}
-            <li class="completed">
-                <strong>{{ task.title }}</strong>
-                {% if task.note %}- {{ task.note }}{% endif %}
-                <em>
-                    ({{ task.completed_pomodoros }}/{{ task.estimated_pomodoros }} Pomodoros,
-                    {% if task.priority == 1 %}High{% elif task.priority == 2 %}Urgent{% else %}Normal{% endif %})
-                </em>
-                <form method="POST" style="display:inline;">
-                    <input type="hidden" name="action" value="delete_task">
-                    <input type="hidden" name="task_id" value="{{ task.id }}">
-                    <button type="submit" class="btn small-btn">🗑</button>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
-</div>
 </div>
 {% endblock %}
 

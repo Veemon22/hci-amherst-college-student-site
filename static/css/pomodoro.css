@@ -1,337 +1,562 @@
-.pomodoro-container {
-  background: #fff;
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  max-width: 800px;
-  margin: 40px auto;
-  text-align: center;
+/* Pomodoro Page */
+.pomodoro-page {
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.6s ease;
 }
 
-.pomodoro-container h1 {
-  color: #5e2a8c;
-  font-family: "Setimo", sans-serif;
-  margin-bottom: 10px;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.pomodoro-container p {
-  color: #555;
-  margin-bottom: 30px;
-  font-family: "Tiempos", serif;
+.pomodoro-header {
+    text-align: center;
+    margin-bottom: 40px;
 }
 
-/* Phase Buttons */
-.phase-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 25px;
+.pomodoro-header h1 {
+    font-size: 2.2rem;
+    color: #5e2a8c;
+    margin-bottom: 10px;
+}
+
+.pomodoro-header p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Main Pomodoro Section */
+.pomodoro-main {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+/* Phase Selector */
+.phase-selector {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 .phase-btn {
-  background-color: #e8daf7;
-  border: none;
-  color: #5e2a8c;
-  font-family: "Setimo", sans-serif;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.phase-btn.active {
-  background-color: #5e2a8c;
-  color: #fff;
-  transform: scale(1.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #f8f5fb 0%, #f0e6fa 100%);
+    border: 2px solid #e4d5f4;
+    color: #5e2a8c;
+    padding: 15px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+    font-size: 0.95rem;
 }
 
 .phase-btn:hover {
-  background-color: #d4b6f5;
+    border-color: #7b3ab8;
+    transform: translateY(-2px);
 }
 
-/* Timer */
-.pomodoro-timer {
-  margin: 30px 0;
-  background-color: #f9f6fc;
-  border-radius: 12px;
-  padding: 40px 20px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+.phase-btn.active {
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
+    color: white;
+    border-color: #5e2a8c;
+    box-shadow: 0 4px 12px rgba(94, 42, 140, 0.3);
+}
+
+.phase-icon {
+    font-size: 1.5rem;
+}
+
+/* Timer Card */
+.timer-card {
+    background: linear-gradient(135deg, #f8f5fb 0%, #f0e6fa 100%);
+    border: 2px solid #e4d5f4;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
 }
 
 #timer-label {
-  font-size: 1.4rem;
-  color: #5e2a8c;
-  margin-bottom: 10px;
+    font-size: 1.3rem;
+    color: #5e2a8c;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
 }
 
 #timer-display {
-  font-size: 3.5rem;
-  font-weight: bold;
-  font-family: "Setimo", sans-serif;
-  color: #2c1650;
+    font-size: 5rem;
+    font-weight: bold;
+    color: #5e2a8c;
+    margin-bottom: 30px;
+    font-family: monospace;
 }
 
-/* Buttons & Actions */
-.pomodoro-actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 30px;
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-#start-btn, 
-#complete-btn, 
-.btn {
-  background-color: #5e2a8c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-family: "Setimo", sans-serif;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
+.control-btn {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-#start-btn:hover, 
-#complete-btn:hover, 
-.btn:hover {
-  background-color: #4b216b;
-  transform: translateY(-2px);
+.control-btn.primary {
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
+    color: white;
+    box-shadow: 0 3px 10px rgba(94, 42, 140, 0.3);
 }
 
-.btn.secondary {
-  background-color: #ccc;
-  color: #333;
+.control-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(94, 42, 140, 0.4);
 }
 
-.btn.small-btn {
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  background-color: #e0d4f4;
-  color: #5e2a8c;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+.control-btn.success {
+    background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+    color: white;
+    box-shadow: 0 3px 10px rgba(67, 160, 71, 0.3);
 }
 
-.btn.small-btn:hover {
-  background-color: #d4b6f5;
-  transform: scale(1.05);
+.control-btn.success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(67, 160, 71, 0.4);
 }
 
-/* Stats */
-.pomodoro-stats {
-  margin: 25px 0;
-  font-family: "Tiempos", serif;
+/* Stats Card */
+.stats-card {
+    background: linear-gradient(135deg, #f8f5fb 0%, #f0e6fa 100%);
+    border: 2px solid #e4d5f4;
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-#pomodoros-completed {
-  font-size: 2rem;
-  color: #5e2a8c;
-  font-weight: bold;
+.stat-item {
+    text-align: center;
 }
 
-/* ---------------- Task Lists ---------------- */
-.pomodoro-tasks, .completed-tasks {
-  text-align: left;
-  margin-top: 40px;
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5e2a8c;
+}
+
+.settings-btn {
+    background: #5e2a8c;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.settings-btn:hover {
+    background: #4b216b;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+/* Task Section */
+.task-section {
+    margin-top: 50px;
+}
+
+.task-section h2 {
+    font-size: 1.8rem;
+    color: #5e2a8c;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #e4d5f4;
+}
+
+.task-section h3 {
+    font-size: 1.3rem;
+    color: #5e2a8c;
+    margin-bottom: 15px;
+}
+
+/* Add Task Card */
+.add-task-card {
+    background: linear-gradient(135deg, #f8f5fb 0%, #f0e6fa 100%);
+    border: 2px solid #e4d5f4;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.add-task-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.add-task-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.form-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px;
+    border: 2px solid #e4d5f4;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #7b3ab8;
+}
+
+.form-input.small {
+    flex: 0 1 180px;
+}
+
+.btn-add-task {
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-add-task:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(94, 42, 140, 0.3);
+}
+
+/* Tasks Container */
+.tasks-container {
+    margin-bottom: 30px;
 }
 
 .task-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.task-list li {
-  background-color: #f4f1fa;
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    margin-bottom: 12px;
+    background: white;
+    border: 2px solid #e4d5f4;
+    border-radius: 12px;
+    transition: all 0.2s ease;
 }
 
-.task-list li:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.task-item:hover {
+    transform: translateX(4px);
+    border-color: #7b3ab8;
+    box-shadow: 0 4px 12px rgba(94, 42, 140, 0.1);
 }
 
-.task-list li strong {
-  font-family: "Setimo", sans-serif;
-  color: #2c1650;
+.task-item.completed {
+    opacity: 0.6;
+    background: #fafafa;
 }
 
-.task-list li em {
-  font-style: normal;
-  color: #666;
-  font-size: 0.95rem;
-  display: block;
-  margin-top: 4px;
+.task-item.completed .task-title {
+    text-decoration: line-through;
 }
 
-.task-actions form {
-  display: inline-block;
-  margin-left: 6px;
+/* Priority Styling */
+.task-item.priority-2 {
+    border-left: 4px solid #d32f2f;
 }
 
-.completed-tasks li.completed {
-  opacity: 0.6;
-  text-decoration: line-through;
+.task-item.priority-1 {
+    border-left: 4px solid #f57c00;
 }
 
-/* No tasks message */
-.pomodoro-tasks p.empty-message, .completed-tasks p.empty-message {
-  font-style: italic;
-  color: #888;
-  text-align: center;
-  margin-top: 10px;
+.task-item.priority-0 {
+    border-left: 4px solid #7b3ab8;
 }
 
-/* -------- Add Task Form -------- */
-.add-task-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  background-color: #f9f6fc;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  margin-bottom: 20px;
+.task-content {
+    flex: 1;
 }
 
-.add-task-form input[type="text"],
-.add-task-form input[type="number"],
-.add-task-form select {
-  flex: 1 1 200px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-family: "Tiempos", serif;
-  font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+.task-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
 }
 
-.add-task-form input[type="text"]:focus,
-.add-task-form input[type="number"]:focus,
-.add-task-form select:focus {
-  border-color: #5e2a8c;
-  box-shadow: 0 0 0 2px rgba(94,42,140,0.15);
-  outline: none;
+.task-title {
+    font-size: 1.1rem;
+    color: #333;
 }
 
-.add-task-form button {
-  background-color: #5e2a8c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-family: "Setimo", sans-serif;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  flex-shrink: 0;
+.priority-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    white-space: nowrap;
 }
 
-.add-task-form button:hover {
-  background-color: #4b216b;
-  transform: translateY(-2px);
+.priority-badge.priority-2 {
+    background: #ffebee;
+    color: #d32f2f;
 }
 
-/* ---------- Pomodoro Form Container ---------- */
-.home-container {
-  max-width: 700px;
-  margin: 40px auto;
-  padding: 40px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  text-align: center;
-  font-family: "Tiempos", serif;
+.priority-badge.priority-1 {
+    background: #fff3e0;
+    color: #f57c00;
 }
 
-.home-inner h1 {
-  color: #5e2a8c;
-  font-family: "Setimo", sans-serif;
-  margin-bottom: 10px;
+.priority-badge.priority-0 {
+    background: #f3e5f5;
+    color: #7b1fa2;
 }
 
-.home-inner p {
-  color: #555;
-  margin-bottom: 30px;
+.task-note {
+    font-size: 0.95rem;
+    color: #666;
+    margin: 8px 0;
 }
 
-/* ---------- Form Fields ---------- */
+.task-meta {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.pomodoro-count {
+    font-weight: 600;
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.action-btn.complete {
+    background: #e8f5e9;
+    color: #43a047;
+}
+
+.action-btn.complete:hover {
+    background: #66bb6a;
+    color: white;
+    transform: scale(1.1);
+}
+
+.action-btn.delete {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.action-btn.delete:hover {
+    background: #ef5350;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f8f5fb 0%, #f0e6fa 100%);
+    border-radius: 12px;
+    border: 2px dashed #e4d5f4;
+}
+
+.empty-state p {
+    color: #666;
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+/* Pomodoro Form Page */
+.pomodoro-form-page {
+    max-width: 700px;
+    margin: 60px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.6s ease;
+}
+
+.pomodoro-form-page h1 {
+    color: #5e2a8c;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.pomodoro-form-page p {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+}
+
 .pomodoro-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
 }
 
 .form-group label {
-  font-weight: bold;
-  color: #2c1650;
-  margin-bottom: 5px;
-  display: block;
+    font-weight: bold;
+    color: #5e2a8c;
+    margin-bottom: 8px;
 }
 
 .form-group input[type="number"] {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: 12px;
+    border: 2px solid #e4d5f4;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
 }
 
 .form-group input[type="number"]:focus {
-  border-color: #5e2a8c;
-  box-shadow: 0 0 0 2px rgba(94,42,140,0.15);
-  outline: none;
+    outline: none;
+    border-color: #7b3ab8;
 }
 
-/* ---------- Buttons ---------- */
 .form-buttons {
-  display: flex;
-  justify-content: flex-start;
-  gap: 15px;
-  margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
 }
 
 .form-buttons .btn {
-  background-color: #5e2a8c;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-family: "Setimo", sans-serif;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  text-decoration: none;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
 }
 
-.form-buttons .btn:hover {
-  background-color: #4b216b;
-  transform: translateY(-2px);
+.form-buttons .btn:not(.secondary) {
+    background: linear-gradient(135deg, #7b3ab8 0%, #5e2a8c 100%);
+    color: white;
+    box-shadow: 0 3px 10px rgba(94, 42, 140, 0.3);
+}
+
+.form-buttons .btn:not(.secondary):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(94, 42, 140, 0.4);
 }
 
 .form-buttons .btn.secondary {
-  background-color: #ccc;
-  color: #333;
+    background: #f0e6fa;
+    color: #5e2a8c;
+    border: 2px solid #e4d5f4;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 600px) {
-  .home-container {
-    padding: 30px 20px;
-  }
-  .form-buttons {
-    flex-direction: column;
-    gap: 10px;
-  }
+.form-buttons .btn.secondary:hover {
+    background: #e4d5f4;
+    border-color: #7b3ab8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pomodoro-page,
+    .pomodoro-form-page {
+        padding: 25px 20px;
+        margin: 30px 20px;
+    }
+
+    #timer-display {
+        font-size: 3.5rem;
+    }
+
+    .stats-card {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-input.small {
+        flex: 1;
+        min-width: auto;
+    }
+
+    .task-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .task-actions {
+        align-self: flex-end;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
 }
