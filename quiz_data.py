@@ -107,10 +107,30 @@ quizzes = {
             }
         ],
         "results": [
-            {"min_points": 0, "max_points": 9, "text": "You need to brush up on Amherst history!"},
-            {"min_points": 10, "max_points": 19, "text": "You know some Amherst history."},
-            {"min_points": 20, "max_points": 27, "text": "You’re pretty knowledgeable about Amherst history!"},
-            {"min_points": 28, "max_points": 30, "text": "You’re an Amherst history expert!"}
+            {
+                "image": "base_quizzes_images/amherst_history_quiz_result_1.jpg",
+                "min_points": 0, 
+                "max_points": 9, 
+                "text": "You need to brush up on Amherst history!"
+            },
+            {
+                "image": "base_quizzes_images/amherst_history_quiz_result_2.jpeg", 
+                "min_points": 10, 
+                "max_points": 19, 
+                "text": "You know some Amherst history."
+            },
+            {
+                "image": "base_quizzes_images/amherst_history_quiz_result_3.jpg",
+                "min_points": 20, 
+                "max_points": 27, 
+                "text": "You’re pretty knowledgeable about Amherst history!"
+            },
+            {
+                "image": "base_quizzes_images/amherst_history_quiz_result_4.jpeg",
+                "min_points": 28, 
+                "max_points": 30, 
+                "text": "You’re an Amherst history expert!"
+            }
         ]
     },
     "study_spot": {
@@ -222,21 +242,25 @@ quizzes = {
     ],
     "results": [
         {
+            "image": "base_quizzes_images/where_to_study_quiz_result_1.jpg",
             "min_points": 0,
             "max_points": 8,
             "text": "🏞️ **First-Year Quad** — You’re happiest under the trees with sunlight and laughter around you. Grab a blanket, soak in the campus vibes, and study outdoors!"
         },
         {
+            "image": "base_quizzes_images/where_to_study_quiz_result_2.jpg",
             "min_points": 9,
             "max_points": 14,
             "text": "☕ **Frost Café** — You like to stay productive with a latte nearby. The background hum of conversation keeps you focused but not lonely."
         },
         {
+            "image": "base_quizzes_images/where_to_study_quiz_result_3.jpg",
             "min_points": 15,
             "max_points": 21,
             "text": "🔬 **Science Center Atrium** — Bright, airy, and structured, just like your study habits. You love that mix of focus and movement."
         },
         {
+            "image": "base_quizzes_images/where_to_study_quiz_result_4.jpg",
             "min_points": 22,
             "max_points": 30,
             "text": "📚 **Frost Library 3rd Floor** — You’re all about calm and deep concentration. Find your favorite carrel, silence your phone, and power through your work."
@@ -303,21 +327,25 @@ quizzes = {
     ],
     "results": [
         {
+            "image": "base_quizzes_images/which_building_quiz_result_1.jpg",
             "min_points": 0,
             "max_points": 4,
             "text": "Johnson Chapel"
         },
         {
+            "image": "base_quizzes_images/which_building_quiz_result_2.jpg",
             "min_points": 5,
             "max_points": 7,
             "text": "Frost Library"
         },
         {
+            "image": "base_quizzes_images/which_building_quiz_result_3.jpg",
             "min_points": 8,
             "max_points": 10,
             "text": "Science Center"
         },
         {
+            "image": "base_quizzes_images/which_building_quiz_result_4.jpg",
             "min_points": 11,
             "max_points": 15,
             "text": "Valentine Dining Hall"

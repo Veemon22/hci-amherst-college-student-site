@@ -85,6 +85,7 @@ def initial_data():
             result = QuizResultRange(
                 min_points=res["min_points"],
                 max_points=res["max_points"],
+                image=res.get("image"),
                 text=res["text"],
                 quiz_id=quiz.id
             )

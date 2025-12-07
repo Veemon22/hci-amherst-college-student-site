@@ -7,32 +7,59 @@
 {% endblock %}
 
 {% block content %}
-<h1>My Past Results for "{{ quiz.title }}"</h1>
+<div class="results-page">
+    <h1>My Past Results for "{{ quiz.title }}"</h1>
 
-{% if results %}
-<table class="results-table">
-    <thead>
-        <tr>
-            <th>Date Taken</th>
-            <th>Score</th>
-            <th>Percentage</th>
-            <th>Result Text</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for r in results %}
-        <tr>
-            <td>{{ r.timestamp.strftime("%b %d, %Y %I:%M %p") }}</td>
-            <td>{{ r.score }} / {{ r.total }}</td>
-            <td>{{ "%.1f"|format((r.score / r.total) * 100) }}%</td>
-            <td>{{ r.text }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No past results yet — try taking the quiz!</p>
-{% endif %}
+    {% if results %}
+        {% if quiz.quiz_type == 'objective' %}
+        <div class="stats-summary">
+            <div class="stat-card">
+                <h3>Attempts</h3>
+                <div class="stat-value">{{ results|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Best Score</h3>
+                <div class="stat-value">{{ "%.0f"|format((results|map(attribute='score')|max / results|map(attribute='total')|max) * 100) }}%</div>
+            </div>
+            <div class="stat-card">
+                <h3>Average Score</h3>
+                <div class="stat-value">{{ "%.0f"|format((results|map(attribute='score')|sum / results|map(attribute='total')|sum) * 100) }}%</div>
+            </div>
+        </div>
+        {% endif %}
 
-<a href="{{ url_for('quizzes.quizzes_page') }}" class="back-btn">← Back to Quizzes</a>
+        <div class="table-container">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Date Taken</th>
+                        {% if quiz.quiz_type == 'objective' %}
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        {% endif %}
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td>{{ r.timestamp.strftime("%b %d, %Y %I:%M %p") }}</td>
+                        {% if quiz.quiz_type == 'objective' %}
+                        <td>{{ r.score }} / {{ r.total }}</td>
+                        <td>{{ "%.1f"|format((r.score / r.total) * 100) }}%</td>
+                        {% endif %}
+                        <td>{{ r.text }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="no-results">
+            <p>No past results yet — try taking the quiz!</p>
+        </div>
+    {% endif %}
+
+    <a href="{{ url_for('quizzes.quizzes_page') }}" class="back-btn">← Back to Quizzes</a>
+</div>
 {% endblock %}

@@ -11,8 +11,12 @@ addQuestionBtn.addEventListener('click', () => {
     qDiv.dataset.index = questionIndex;
     qDiv.innerHTML = `
         <h3>Question ${questionIndex + 1}</h3>
+        <label>Text</label>
         <input type="text" name="question_text_${questionIndex}" placeholder="Question text" required>
+        <label>Image</label>
+        <small class="description">Optional. Displays below the question.</small>
         <input type="file" name="question_image_${questionIndex}" accept="image/*">
+        <h4>Options</h4>
         <div class="options-container"></div>
         <button type="button" class="add-option-btn">Add Option</button>
         <button type="button" class="delete-question-btn">Delete Question</button>
@@ -72,9 +76,14 @@ addResultBtn.addEventListener('click', () => {
     const rDiv = document.createElement('div');
     rDiv.classList.add('result-block');
     rDiv.innerHTML = `
-        <input type="number" name="result_min[]" placeholder="Min points" required>
-        <input type="number" name="result_max[]" placeholder="Max points" required>
-        <input type="text" name="result_text[]" placeholder="Result text" required>
+        <div class="result-inputs">
+            <input type="number" name="result_min[]" placeholder="Min points" required>
+            <input type="number" name="result_max[]" placeholder="Max points" required>
+            <input type="text" name="result_text[]" placeholder="Result text" required>
+        </div>
+        <label>Result Image</label>
+        <small class="description">Optional. Displays when student gets this result.</small>
+        <input type="file" name="result_image[]" accept="image/*">
         <button type="button" class="delete-result-btn">Delete Result</button>
     `;
     resultsContainer.appendChild(rDiv);
@@ -121,9 +130,7 @@ function updateValidation() {
 
     const quizType = document.getElementById('quiz_type').value;
 
-    // ----------------------------
-    // 1. Validate Questions
-    // ----------------------------
+    // Validate Questions
     if (valid && questions.length === 0) {
         valid = false;
         message = "You must add at least one question.";
@@ -159,9 +166,7 @@ function updateValidation() {
         });
     }
 
-    // ----------------------------
-    // 2. Validate Result Ranges
-    // ----------------------------
+    // Validate Result Ranges
     if (valid && results.length === 0) {
         valid = false;
         message = "You must add at least one result range.";
@@ -194,15 +199,12 @@ function updateValidation() {
             ranges.push({ min, max, index: idx + 1 });
         });
 
-        // Sort ranges by minimum value
         ranges.sort((a, b) => a.min - b.min);
 
-        // Check for overlaps
         for (let i = 0; i < ranges.length - 1 && valid; i++) {
             const current = ranges[i];
             const next = ranges[i + 1];
 
-            // Overlap occurs if max > next.min (NOT >=)
             if (current.max > next.min) {
                 valid = false;
                 message = `Result ranges ${current.index} and ${next.index} overlap.`;
@@ -210,9 +212,7 @@ function updateValidation() {
         }
     }
 
-    // ----------------------------
-    // 3. Apply Button States / Tooltips
-    // ----------------------------
+    // Apply Button States
     [saveBtn, publishBtn].forEach(btn => {
         if (!btn) return;
         const tip = btn.querySelector('.tooltiptext');
@@ -228,3 +228,10 @@ function updateValidation() {
         }
     });
 }
+
+// Initialize on page load
+toggleCorrectCheckboxes();
+updateValidation();
+
+// Listen for quiz type changes
+document.getElementById('quiz_type').addEventListener('change', toggleCorrectCheckboxes);

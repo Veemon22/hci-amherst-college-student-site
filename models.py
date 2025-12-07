@@ -55,6 +55,7 @@ class QuizResultRange(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     min_points = db.Column(db.Integer, nullable=False)
     max_points = db.Column(db.Integer, nullable=False)
+    image = db.Column(db.String(225), nullable=True)
     text = db.Column(db.Text, nullable=False)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
 

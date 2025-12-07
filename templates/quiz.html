@@ -7,52 +7,53 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ quiz.title }}</h1>
-<p>{{ quiz.description }}</p>
+<div class="quiz-page">
+    <h1>{{ quiz.title }}</h1>
+    <p>{{ quiz.description }}</p>
 
-<div id="quiz-container" data-quiz-id="{{ quiz.id }}">
-    <div id="progress">
-        Question <span id="current-question">1</span> / {{ quiz.questions | length }}
-    </div>
-
-    <div id="question-section">
-        {% for question in quiz.questions %}
-        <div class="question-block {% if not loop.first %}hidden{% endif %}" data-question="{{ loop.index }}">
-            {% if question.image %}
-            <img src="{{ url_for('static', filename=question.image) }}" alt="Question image" class="question-image">
-            {% endif %}
-            <h2 class="question-text">{{ question.text }}</h2>
-            <div class="options-container">
-                {% for option in question.options %}
-                <button class="option-btn"
-                        data-points="{{ option.points }}">
-                    {{ option.text }}
-                </button>
-                {% endfor %}
-            </div>
+    <div id="quiz-container" data-quiz-id="{{ quiz.id }}">
+        <div id="progress">
+            Question <span id="current-question">1</span> / {{ quiz.questions | length }}
         </div>
-        {% endfor %}
-    </div>
 
-    <!-- Enhanced result container -->
-    <div id="result-container" class="hidden">
-        <h2 id="result-title"></h2>
-        <p id="score-display"></p>
-        <img id="result-image" class="hidden" src="" alt="Result image">
+        <div id="question-section">
+            {% for question in quiz.questions %}
+            <div class="question-block {% if not loop.first %}hidden{% endif %}" data-question="{{ loop.index }}">
+                {% if question.image %}
+                <img src="{{ url_for('static', filename=question.image) }}" alt="Question image" class="question-image">
+                {% endif %}
+                <h2 class="question-text">{{ question.text }}</h2>
+                <div class="options-container">
+                    {% for option in question.options %}
+                    <button class="option-btn"
+                            data-points="{{ option.points }}">
+                        {{ option.text }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
-        <h3>All Possible Results:</h3>
-        <ul id="all-results-list"></ul>
+        <div id="result-container" class="hidden">
+            <h2 id="result-title"></h2>
+            <p id="score-display"></p>
+            <img id="result-image" class="hidden" src="" alt="Result image">
 
-        <a href="{{ url_for('quizzes.quizzes_page') }}" class="back-btn">← Back to Quizzes</a>
-    </div>
+            <h3>All Possible Results:</h3>
+            <ul id="all-results-list"></ul>
 
-    <div id="result-data" class="hidden">
-        {% for result in quiz.results %}
-        <div data-min="{{ result.min_points }}"
-             data-max="{{ result.max_points }}"
-             data-text="{{ result.text }}"
-             data-image="{{ result.image or '' }}"></div>
-        {% endfor %}
+            <a href="{{ url_for('quizzes.quizzes_page') }}" class="back-btn">← Back to Quizzes</a>
+        </div>
+
+        <div id="result-data" class="hidden">
+            {% for result in quiz.results %}
+            <div data-min="{{ result.min_points }}"
+                 data-max="{{ result.max_points }}"
+                 data-text="{{ result.text }}"
+                 data-image="{{ result.image or '' }}"></div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}
