@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - Amherst College Student{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/resources.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="resources-page">
+    <h1>📚 Resources</h1>
+    <p>Here is a list of a bunch of interesting and important resources to Amherst Students.</p>
+
+    <div class="resource-grid">
+        <a href="{{ url_for('resource', resource_id=1)}}" class="resource-card">
+            <div class="icon-circle"><i class="fa-solid fa-map"></i></div>
+            <h2>Campus Map</h2>
+            <p>Find out where things are on campus</p>
+        </a>
+        <a href="{{ url_for('resource', resource_id=2)}}" class="resource-card">
+            <div class="icon-circle"><i class="fa-solid fa-baseball"></i></div>
+            <h2>Athletics</h2>
+            <p>Look at anything atheltic related</p>
+        </a>
+        <a href="{{ url_for('resource', resource_id=3)}}" class="resource-card">
+            <div class="icon-circle"><i class="fa-solid fa-book-open"></i></div>
+            <h2>Course Catalog</h2>
+            <p>Explore the courses offered at Amherst College</p>
+        </a>
+        <a href="{{ url_for('resource', resource_id=4)}}" class="resource-card">
+            <div class="icon-circle"><i class="fa-solid fa-user-tie"></i></div>
+            <h2>Rate my Professor</h2>
+            <p>Look up reviews of professors</p>
+        </a>
+        <a href="{{ url_for('resource', resource_id=5)}}" class="resource-card">
+            <div class="icon-circle"><i class="fa-solid fa-hospital"></i></div>
+            <h2>Health Services</h2>
+            <p>Access health resources and services available to students</p>
+        </a>
+        
+    </div>
+</div>
+{% endblock %}

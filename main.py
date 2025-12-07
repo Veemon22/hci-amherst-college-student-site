@@ -199,6 +199,17 @@ def dining():
     user = get_current_user()
     return render_template('dining.html', username=user.username)
 
+@app.route('/resources')
+@login_required
+def resources():
+    user = get_current_user()
+    return render_template('resources.html', username=user.username)
+
+@app.route('/resource/<int:resource_id>')
+@login_required
+def resource(resource_id):
+    user = get_current_user()
+    return render_template('resource.html', username=user.username, resource_id=resource_id)
 
 @app.route('/about')
 @login_required

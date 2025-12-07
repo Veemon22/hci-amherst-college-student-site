@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Resource - Amherst College Student{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/resource.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="resource-page">
+    {% if resource_id == 1 %}
+    <h1>Campus Map</h1>
+    <p>The Amherst College Campus Map is an essential tool for students, faculty, and visitors
+        to navigate the beautiful and expansive campus. It provides detailed information about
+        building locations, pathways, and key landmarks, making it easier to find your way around.</p>
+    <iframe src="https://map.concept3d.com/?id=750#!s/"></iframe>
+    {% endif %}
+    {% if resource_id == 2 %}
+    <h1>Athletics</h1>
+    <p>Stay updated with the latest news, schedules, and results of Amherst College's
+        athletic teams. Whether you're a student-athlete, a fan, or just interested in
+        college sports, this resource provides comprehensive coverage of all things athletics
+        at Amherst.</p>
+    <iframe src="https://athletics.amherst.edu/"></iframe>
+    {% endif %}
+    {% if resource_id == 3 %}
+    <h1>Course Catalog</h1>
+    <p>Explore the diverse range of courses offered at Amherst College through the
+        official course catalog. This resource allows students to browse course descriptions,
+        prerequisites, and credit information to help plan their academic journey effectively.</p>
+    <iframe src="https://www.amherst.edu/academiclife/college-catalog"></iframe>
+    {% endif %}
+    {% if resource_id == 4 %}
+    <h1>Rate my Professor</h1>
+    <p>Access reviews and ratings of professors at Amherst College to make informed decisions
+        about your course selections. This resource provides insights from fellow students
+        about teaching styles, course difficulty, and overall experiences with faculty members.</p>
+    <iframe src="https://www.ratemyprofessors.com/"></iframe>
+    {% endif %}
+    {% if resource_id == 5 %}
+    <h1>Health Services</h1>
+    <p>Access health resources and services available to students at Amherst College.
+        This resource provides information on medical services, counseling, wellness programs,
+        and other health-related support to ensure students maintain their well-being throughout
+        their college experience.</p>
+    <iframe src="https://www.amherst.edu/campuslife/health-safety-wellness/health-service"></iframe>
+    {% endif %}
+</div>
+{% endblock %}
