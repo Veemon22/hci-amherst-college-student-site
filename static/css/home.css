@@ -1,5 +1,4 @@
-/* Hide nav bar for home (if not needed) */
-.nav-link-bar {
+.nav-links {
     display: none;
 }
 

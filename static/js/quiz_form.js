@@ -245,4 +245,28 @@ toggleCorrectCheckboxes();
 updateValidation();
 
 // Listen for quiz type changes
-document.getElementById('quiz_type').addEventListener('change', toggleCorrectCheckboxes);
+document.getElementById('quiz_type').addEventListener('change', () => {
+    toggleCorrectCheckboxes();
+    updateValidation();
+});
+
+// Listen for any input/change on the entire form
+const form = document.getElementById('quiz-form');
+form.addEventListener('input', updateValidation);
+form.addEventListener('change', updateValidation);
+
+// Listen for file inputs specifically
+form.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', updateValidation);
+});
+
+// Run validation after any DOM changes (added/removed questions, options, results)
+const observeContainer = (container) => {
+    const observer = new MutationObserver(() => {
+        updateValidation();
+    });
+    observer.observe(container, { childList: true, subtree: true });
+};
+
+observeContainer(questionsContainer);
+observeContainer(resultsContainer);
