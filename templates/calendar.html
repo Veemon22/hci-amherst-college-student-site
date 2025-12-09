@@ -74,9 +74,14 @@
                                         data-gcal-id="{{ event.gcal_id or '' }}"
                                         data-title="{{ event.title }}"
                                         data-description="{{ event.description or 'No description provided.' }}"
-                                        data-time="{{ event.date.strftime('%I:%M %p') }}"
+                                        data-time="{% if event.is_all_day %}All Day{% else %}{{ event.date.strftime('%I:%M %p') }}{% endif %}"
+                                        data-is-all-day="{{ event.is_all_day }}"
                                         onclick="showEventModal(this)">
-                                        {{ event.date.strftime('%I:%M %p') }} - {{ event.title }}
+                                        {% if event.is_all_day %}
+                                            All Day - {{ event.title }}
+                                        {% else %}
+                                            {{ event.date.strftime('%I:%M %p') }} - {{ event.title }}
+                                        {% endif %}
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -89,9 +94,14 @@
                                         data-gcal-id="{{ event.get('id') }}"
                                         data-title="{{ event.summary }}"
                                         data-description="{{ event.description or 'No description provided.' }}"
-                                        data-time="{{ event_date.strftime('%I:%M %p') }}"
+                                        data-time="{% if event.is_all_day %}All Day{% else %}{{ event_date.strftime('%I:%M %p') }}{% endif %}"
+                                        data-is-all-day="{{ event.is_all_day }}"
                                         onclick="showEventModal(this)">
-                                        {{ event_date.strftime('%I:%M %p') }} - {{ event.summary }}
+                                        {% if event.is_all_day %}
+                                            All Day - {{ event.summary }}
+                                        {% else %}
+                                            {{ event_date.strftime('%I:%M %p') }} - {{ event.summary }}
+                                        {% endif %}
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -107,6 +117,7 @@
 
 </div>
 
+    <!-- Add Event Modal -->
     <div id="addEventModal" class="modal hidden">
         <div class="modal-content">
             <span id="close-add-event-modal" class="close-btn">&times;</span>
@@ -119,25 +130,46 @@
                 <input type="text" name="description">
                 <label>Date:</label>
                 <input type="date" name="date" required>
-                <label>Time:</label>
-                <input type="time" name="time" step="60" required>
+                
+                <label>
+                    <input type="checkbox" name="is_all_day" id="is-all-day-checkbox">
+                    All-day event
+                </label>
+
+                <div id="time-input-container">
+                    <label>Time:</label>
+                    <input type="time" name="time" step="60" id="time-input" required>
+                </div>
 
                 {% if session.get('gcal_credentials') %}
-                <label style="text-align: center;" >Add to Google Calendar?</label>
-                <input type="checkbox" name="add_to_gcal" value="yes">
+                <label style="text-align: center;">
+                    <input type="checkbox" name="sync_to_gcal" value="yes">
+                    Add to Google Calendar?
+                </label>
                 {% endif %}
                 <button type="submit" class="submit-btn">Add Event</button>
             </form>
         </div>
     </div>
 
+    <!-- Edit Event Modal -->
     <div id="eventModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3>Edit Event</h3>
             <label><strong>Title:</strong></label>
             <input type="text" id="modal-title-input">
-            <label><strong>Time:</strong></label>
-            <input type="time" id="modal-time-input">
+            
+            <label>
+                <input type="checkbox" id="modal-is-all-day-checkbox">
+                All-day event
+            </label>
+
+            <div id="modal-time-container">
+                <label><strong>Time:</strong></label>
+                <input type="time" id="modal-time-input">
+            </div>
+
             <label><strong>Description:</strong></label>
             <textarea id="modal-description-input"></textarea>
 
@@ -151,7 +183,7 @@
         </div>
     </div>
 
-        <!-- Sync Confirmation Modal -->
+    <!-- Sync Confirmation Modal -->
     <div id="syncConfirmModal" class="modal hidden">
         <div class="modal-content">
             <span id="close-sync-modal" class="close-btn">&times;</span>

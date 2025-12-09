@@ -1,4 +1,36 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // --- All-day event checkbox logic for ADD modal ---
+    const isAllDayCheckbox = document.getElementById('is-all-day-checkbox');
+    const timeInputContainer = document.getElementById('time-input-container');
+    const timeInput = document.getElementById('time-input');
+
+    if (isAllDayCheckbox && timeInputContainer && timeInput) {
+        isAllDayCheckbox.addEventListener('change', () => {
+            if (isAllDayCheckbox.checked) {
+                timeInputContainer.style.display = 'none';
+                timeInput.removeAttribute('required');
+            } else {
+                timeInputContainer.style.display = 'block';
+                timeInput.setAttribute('required', 'required');
+            }
+        });
+    }
+
+    // --- All-day event checkbox logic for EDIT modal ---
+    const modalIsAllDayCheckbox = document.getElementById('modal-is-all-day-checkbox');
+    const modalTimeContainer = document.getElementById('modal-time-container');
+    const modalTimeInput = document.getElementById('modal-time-input');
+
+    if (modalIsAllDayCheckbox && modalTimeContainer && modalTimeInput) {
+        modalIsAllDayCheckbox.addEventListener('change', () => {
+            if (modalIsAllDayCheckbox.checked) {
+                modalTimeContainer.style.display = 'none';
+            } else {
+                modalTimeContainer.style.display = 'block';
+            }
+        });
+    }
+
     const openAddEventBtn = document.getElementById("open-add-event-modal");
     const addEventModal = document.getElementById("addEventModal");
     const closeAddEventBtn = document.getElementById("close-add-event-modal");
@@ -12,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const saveEventBtn = document.getElementById("save-event-btn");
 
     const modalTitleInput = document.getElementById("modal-title-input");
-    const modalTimeInput = document.getElementById("modal-time-input");
+
     const modalDescriptionInput = document.getElementById("modal-description-input");
 
     // --- Day Overview Modal Elements ---
@@ -82,6 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const newTitle = modalTitleInput.value;
             const newTime = modalTimeInput.value;
             const newDescription = modalDescriptionInput.value;
+            const isAllDay = modalIsAllDayCheckbox.checked;
 
             if (!eventId && !gcalId) return;
 
@@ -92,9 +125,14 @@ document.addEventListener("DOMContentLoaded", () => {
             form.appendChild(createHiddenInput("event_id", eventId));
             form.appendChild(createHiddenInput("gcal_id", gcalId));
             form.appendChild(createHiddenInput("title", newTitle));
-            form.appendChild(createHiddenInput("time", newTime));
+            if (!isAllDay && newTime){
+                form.appendChild(createHiddenInput("time", newTime));
+            }
             form.appendChild(createHiddenInput("description", newDescription));
-
+            if (isAllDay){
+                form.appendChild(createHiddenInput("is_all_day", isAllDay ? "on" : ""));
+            }
+            
             document.body.appendChild(form);
             form.submit();
         });
@@ -227,10 +265,24 @@ function showEventModal(element) {
     const description = element.getAttribute("data-description");
     const eventId = element.getAttribute("data-id") || "";
     const gcalId = element.getAttribute("data-gcal-id") || "";
+    const isAllDay = element.getAttribute("data-is-all-day") === "True";
 
     document.getElementById("modal-title-input").value = title;
-    document.getElementById("modal-time-input").value = convertTimeToInputFormat(time);
     document.getElementById("modal-description-input").value = description;
+
+    const modalIsAllDayCheckbox = document.getElementById("modal-is-all-day-checkbox");
+    const modalTimeContainer = document.getElementById("modal-time-container");
+    const modalTimeInput = document.getElementById("modal-time-input");
+
+    if (isAllDay) {
+        modalIsAllDayCheckbox.checked = true;
+        modalTimeContainer.style.display = 'none';
+        modalTimeInput.value = '';
+    } else {
+        modalIsAllDayCheckbox.checked = false;
+        modalTimeContainer.style.display = 'block';
+        modalTimeInput.value = convertTimeToInputFormat(time);
+    }
 
     document.getElementById("modal-event-id").value = eventId;
     document.getElementById("modal-gcal-id").value = gcalId;
@@ -239,6 +291,7 @@ function showEventModal(element) {
 }
 
 function convertTimeToInputFormat(timeStr) {
+    if (timeStr === "All Day") return "";
     const [hourMin, period] = timeStr.split(" ");
     let [hours, minutes] = hourMin.split(":").map(Number);
     if (period === "PM" && hours !== 12) hours += 12;

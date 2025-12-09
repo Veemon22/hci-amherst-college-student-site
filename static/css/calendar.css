@@ -286,6 +286,8 @@
 #addEventModal label,
 #eventModal label {
     font-weight: bold;
+    align-items: center;
+    gap: 8px;
     color: #5e2a8c;
 }
 
@@ -329,6 +331,19 @@
 #eventModal .submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(94, 42, 140, 0.4);
+}
+
+#addEventModal input[type="checkbox"],
+#eventModal input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Time container transitions */
+#time-input-container,
+#modal-time-container {
+    transition: opacity 0.2s ease;
 }
 
 /* --- Modal Buttons Container --- */

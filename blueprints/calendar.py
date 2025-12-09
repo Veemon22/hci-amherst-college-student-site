@@ -45,12 +45,22 @@ def save_gcal_creds(creds: Credentials):
 
 def sync_event_to_gcal(event, service):
     """Sync a single Event object to Google Calendar."""
-    gcal_event = {
-        'summary': event.title,
-        'description': event.description,
-        'start': {'dateTime': event.date.isoformat(), 'timeZone': 'America/New_York'},
-        'end': {'dateTime': event.date.isoformat(), 'timeZone': 'America/New_York'}
-    }
+    if event.is_all_day:
+        # For all-day events, use 'date' instead of 'dateTime'
+        gcal_event = {
+            'summary': event.title,
+            'description': event.description,
+            'start': {'date': event.date.strftime('%Y-%m-%d')},
+            'end': {'date': event.date.strftime('%Y-%m-%d')}
+        }
+    else:
+        gcal_event = {
+            'summary': event.title,
+            'description': event.description,
+            'start': {'dateTime': event.date.isoformat(), 'timeZone': 'America/New_York'},
+            'end': {'dateTime': event.date.isoformat(), 'timeZone': 'America/New_York'}
+        }
+    
     created_event = service.events().insert(calendarId='primary', body=gcal_event).execute()
     event.gcal_id = created_event.get('id')
     db.session.commit()
@@ -72,9 +82,22 @@ def calendar():
         time_str = request.form.get('time')
         sync_to_gcal = request.form.get('sync_to_gcal')
 
-        if title and date_str and time_str:
-            event_date = datetime.fromisoformat(f"{date_str}T{time_str}")
-            new_event = Event(title=title, description=description, date=event_date, user_id=user.id)
+        is_all_day = request.form.get('is_all_day') == 'on'
+
+        if title and date_str:
+            if is_all_day:
+                event_date = datetime.fromisoformat(f"{date_str}T00:00:00")
+            elif time_str:
+                event_date = datetime.fromisoformat(f"{date_str}T{time_str}")
+            else:
+                return redirect(url_for('calendar.calendar'))
+            new_event = Event(
+                title=title, 
+                description=description, 
+                date=event_date, 
+                user_id=user.id,
+                is_all_day=is_all_day
+            )
             db.session.add(new_event)
             db.session.commit()
 
@@ -275,6 +298,7 @@ def edit_event():
     new_title = request.form.get('title')
     new_time = request.form.get('time')
     new_description = request.form.get('description')
+    is_all_day = request.form.get('is_all_day') == 'on'
 
     creds = get_gcal_creds()
     service = build('calendar', 'v3', credentials=creds) if creds else None
@@ -282,9 +306,13 @@ def edit_event():
     if event_id:
         event = Event.query.filter_by(id=event_id, user_id=user.id).first()
         if event:
-            if new_time:
+            event.is_all_day = is_all_day
+            if is_all_day:
+                event.date = event.date.replace(hour=0, minute=0, second=0, microsecond=0)
+            elif new_time:
                 hours, minutes = map(int, new_time.split(":"))
                 event.date = event.date.replace(hour=hours, minute=minutes)
+
             if new_title:
                 event.title = new_title
             if new_description:
@@ -297,7 +325,11 @@ def edit_event():
                     gcal_event['summary'] = new_title
                 if new_description:
                     gcal_event['description'] = new_description
-                if new_time:
+                if is_all_day:
+                    date_str = event.date.strftime('%Y-%m-%d')
+                    gcal_event['start'] = {'date': date_str}
+                    gcal_event['end'] = {'date': date_str}
+                elif new_time:
                     start_dt = event.date.isoformat()
                     gcal_event['start'] = {'dateTime': start_dt, 'timeZone': 'America/New_York'}
                     gcal_event['end'] = {'dateTime': start_dt, 'timeZone': 'America/New_York'}
