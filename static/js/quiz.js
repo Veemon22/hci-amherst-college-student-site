@@ -107,9 +107,7 @@ function showResult() {
     }
 
     // Show review section for objective quizzes
-    if (quizType === 'objective') {
-        showReviewSection();
-    }
+        showReviewSection(quizType);
 
     // Show all possible result ranges
     const allResultsList = document.getElementById('all-results-list');
@@ -141,7 +139,7 @@ function showResult() {
     }
 }
 
-function showReviewSection() {
+function showReviewSection(quizType) {
     const reviewSection = document.getElementById('review-section');
     const reviewList = document.getElementById('review-list');
     
@@ -150,37 +148,54 @@ function showReviewSection() {
     
     userAnswers.forEach(answer => {
         const reviewItem = document.createElement('div');
-        reviewItem.className = `review-item ${answer.isCorrect ? 'correct' : 'incorrect'}`;
         
-        const icon = answer.isCorrect ? '✓' : '✗';
-        const statusClass = answer.isCorrect ? 'status-correct' : 'status-incorrect';
+        // OBJECTIVE QUIZ REVIEW
+        if (quizType === "objective") {
+            reviewItem.className = `review-item ${answer.isCorrect ? 'correct' : 'incorrect'}`;
+            const icon = answer.isCorrect ? '✓' : '✗';
+            const statusClass = answer.isCorrect ? 'status-correct' : 'status-incorrect';
         
-        // Format correct answers (handle multiple)
-        const correctAnswersText = answer.correctAnswers.length > 1 
-            ? answer.correctAnswers.join(', ') 
-            : answer.correctAnswers[0];
-        
-        reviewItem.innerHTML = `
-            <div class="review-header">
-                <span class="review-number">Question ${answer.questionNumber}</span>
-                <span class="review-status ${statusClass}">${icon} ${answer.isCorrect ? 'Correct' : 'Incorrect'}</span>
-            </div>
-            <div class="review-question">${answer.questionText}</div>
-            <div class="review-answers">
-                <div class="your-answer ${answer.isCorrect ? 'correct-answer' : 'wrong-answer'}">
-                    <strong>Your answer:</strong> ${answer.selectedAnswer}
+            const correctAnswersText = answer.correctAnswers.length > 1 
+                ? answer.correctAnswers.join(', ') 
+                : answer.correctAnswers[0];
+
+            reviewItem.innerHTML = `
+                <div class="review-header">
+                    <span class="review-number">Question ${answer.questionNumber}</span>
+                    <span class="review-status ${statusClass}">${icon} ${answer.isCorrect ? 'Correct' : 'Incorrect'}</span>
                 </div>
-                ${!answer.isCorrect ? `
-                    <div class="correct-answer-display">
-                        <strong>Correct answer${answer.correctAnswers.length > 1 ? 's' : ''}:</strong> ${correctAnswersText}
+                <div class="review-question">${answer.questionText}</div>
+                <div class="review-answers">
+                    <div class="your-answer ${answer.isCorrect ? 'correct-answer' : 'wrong-answer'}">
+                        <strong>Your answer:</strong> ${answer.selectedAnswer}
                     </div>
-                ` : ''}
-            </div>
-        `;
+                    ${!answer.isCorrect ? `
+                        <div class="correct-answer-display">
+                            <strong>Correct answer${answer.correctAnswers.length > 1 ? 's' : ''}:</strong> ${correctAnswersText}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // SUBJECTIVE QUIZ REVIEW
+        else if (quizType === "subjective") {
+            reviewItem.className = "review-item subjective-review";
+            reviewItem.innerHTML = `
+                <div class="review-header">
+                    <span class="review-number">Question ${answer.questionNumber}</span>
+                </div>
+                <div class="review-question">${answer.questionText}</div>
+                <div class="review-answers">
+                    <div class="correct-answer-display">
+                        <strong>Your response:</strong> ${answer.selectedAnswer}
+                    </div>
+                </div>
+            `;
+        }
         
         reviewList.appendChild(reviewItem);
     });
 }
-
 // Initialize first question
 showQuestion(currentQuestion);
