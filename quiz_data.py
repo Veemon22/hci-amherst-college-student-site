@@ -9,7 +9,7 @@ quizzes = {
                 "question": "When was Amherst College founded?",
                 "image": "base_quizzes_images/amherst_history_quiz_1.jpg",
                 "options": [
-                    {"text": "1821", "points": 3},
+                    {"text": "1821", "points": 3, "is_correct": True},
                     {"text": "1801", "points": 0},
                     {"text": "1850", "points": 0},
                     {"text": "1900", "points": 0}
@@ -19,7 +19,7 @@ quizzes = {
                 "question": "What is the official mascot of Amherst College?",
                 "image": "base_quizzes_images/amherst_history_quiz_2.jpeg",
                 "options": [
-                    {"text": "The Mammoth", "points": 3},
+                    {"text": "The Mammoth", "points": 3, "is_correct": True},
                     {"text": "The Lord Jeff", "points": 0},
                     {"text": "The Saber", "points": 0},
                     {"text": "The Eagle", "points": 0}
@@ -31,7 +31,7 @@ quizzes = {
                 "options": [
                     {"text": "Edward Hitchcock", "points": 0},
                     {"text": "Heman Humphrey", "points": 0},
-                    {"text": "Zephaniah Swift Moore", "points": 3},
+                    {"text": "Zephaniah Swift Moore", "points": 3, "is_correct": True},
                     {"text": "Calvin Coolidge", "points": 0}
                 ]
             },
@@ -39,7 +39,7 @@ quizzes = {
                 "question": "What is the name of Amherst College’s student newspaper?",
                 "image": "base_quizzes_images/amherst_history_quiz_4.png",
                 "options": [
-                    {"text": "The Amherst Student", "points": 3},
+                    {"text": "The Amherst Student", "points": 3, "is_correct": True},
                     {"text": "The Amherst Times", "points": 0},
                     {"text": "The Mammoth Gazette", "points": 0},
                     {"text": "The Purple Press", "points": 0}
@@ -49,7 +49,7 @@ quizzes = {
                 "question": "Which nearby college was once part of the 'Little Three' with Amherst?",
                 "image": "base_quizzes_images/amherst_history_quiz_5.jpeg",
                 "options": [
-                    {"text": "Williams and Wesleyan", "points": 3},
+                    {"text": "Williams and Wesleyan", "points": 3, "is_correct": True},
                     {"text": "Harvard and Yale", "points": 0},
                     {"text": "Middlebury and Bowdoin", "points": 0},
                     {"text": "Smith and Mount Holyoke", "points": 0}
@@ -61,7 +61,7 @@ quizzes = {
                 "options": [
                     {"text": "Williams College", "points": 0},
                     {"text": "Ipswich Academy", "points": 0},
-                    {"text": "Hopkins Academy", "points": 3},
+                    {"text": "Hopkins Academy", "points": 3, "is_correct": True},
                     {"text": "Middlebury College", "points": 0}
                 ]
             },
@@ -69,7 +69,7 @@ quizzes = {
                 "question": "What was Amherst College's first curriculum heavily focused on?",
                 "image": "base_quizzes_images/amherst_history_quiz_7.png",
                 "options": [
-                    {"text": "Amherst", "points": 3},
+                    {"text": "Amherst", "points": 3, "is_correct": True},
                     {"text": "Northampton", "points": 0},
                     {"text": "Springfield", "points": 0},
                     {"text": "Hadley", "points": 0}
@@ -80,7 +80,7 @@ quizzes = {
                 "image": "base_quizzes_images/amherst_history_quiz_8.jpg",
                 "options": [
                     {"text": "Frost Library", "points": 0},
-                    {"text": "Johnson Chapel", "points": 3},
+                    {"text": "Johnson Chapel", "points": 3, "is_correct": True},
                     {"text": "Science Center", "points": 0},
                     {"text": "Keefe Campus Center", "points": 0}
                 ]
@@ -90,7 +90,7 @@ quizzes = {
                 "image": "base_quizzes_images/amherst_history_quiz_9.jpg",
                 "options": [
                     {"text": "John F. Kennedy", "points": 0},
-                    {"text": "Calvin Coolidge", "points": 3},
+                    {"text": "Calvin Coolidge", "points": 3, "is_correct": True},
                     {"text": "Franklin D. Roosevelt", "points": 0},
                     {"text": "Theodore Roosevelt", "points": 0}
                 ]
@@ -99,7 +99,7 @@ quizzes = {
                 "question": "What color represents Amherst College?",
                 "image": "base_quizzes_images/amherst_history_quiz_10.png",
                 "options": [
-                    {"text": "Purple", "points": 3},
+                    {"text": "Purple", "points": 3, "is_correct": True},
                     {"text": "Blue", "points": 0},
                     {"text": "Crimson", "points": 0},
                     {"text": "Gold", "points": 0}

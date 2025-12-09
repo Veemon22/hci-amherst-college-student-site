@@ -228,3 +228,124 @@
 .hidden {
     display: none;
 }
+
+/* Review Section */
+#review-section {
+    margin: 30px 0;
+    text-align: left;
+}
+
+#review-section h3 {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #5e2a8c;
+    margin-bottom: 20px;
+}
+
+#review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.review-item {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #e4d5f4;
+    transition: all 0.2s ease;
+}
+
+.review-item.correct {
+    border-left: 4px solid #43a047;
+}
+
+.review-item.incorrect {
+    border-left: 4px solid #d32f2f;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.review-number {
+    font-weight: bold;
+    color: #5e2a8c;
+    font-size: 1.1rem;
+}
+
+.review-status {
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+.status-correct {
+    background: #e8f5e9;
+    color: #43a047;
+}
+
+.status-incorrect {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.review-question {
+    font-size: 1.05rem;
+    color: #333;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.review-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.your-answer,
+.correct-answer-display {
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.your-answer.correct-answer {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.your-answer.wrong-answer {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.correct-answer-display {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 2px solid #81c784;
+}
+
+.review-answers strong {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .review-item {
+        padding: 15px;
+    }
+    
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}

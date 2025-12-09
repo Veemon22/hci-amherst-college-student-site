@@ -11,14 +11,16 @@
     <h1>{{ quiz.title }}</h1>
     <p>{{ quiz.description }}</p>
 
-    <div id="quiz-container" data-quiz-id="{{ quiz.id }}">
+    <div id="quiz-container" data-quiz-id="{{ quiz.id }}" data-quiz-type="{{ quiz.quiz_type}}">
         <div id="progress">
             Question <span id="current-question">1</span> / {{ quiz.questions | length }}
         </div>
 
         <div id="question-section">
             {% for question in quiz.questions %}
-            <div class="question-block {% if not loop.first %}hidden{% endif %}" data-question="{{ loop.index }}">
+            <div class="question-block {% if not loop.first %}hidden{% endif %}" 
+                data-question="{{ loop.index }}"
+                data-question-text="{{ question.text }}">
                 {% if question.image %}
                 <img src="{{ url_for('static', filename=question.image) }}" alt="Question image" class="question-image">
                 {% endif %}
@@ -26,7 +28,9 @@
                 <div class="options-container">
                     {% for option in question.options %}
                     <button class="option-btn"
-                            data-points="{{ option.points }}">
+                            data-points="{{ option.points }}"
+                            data-option-text="{{ option.text }}"
+                            data-is-correct="{{ 'True' if option.is_correct else 'False' }}">
                         {{ option.text }}
                     </button>
                     {% endfor %}
@@ -39,6 +43,11 @@
             <h2 id="result-title"></h2>
             <p id="score-display"></p>
             <img id="result-image" class="hidden" src="" alt="Result image">
+
+            <div id="review-section" class="hidden">
+                <h3>Review Your Answers:</h3>
+                <ul id="review-list"></ul>
+            </div>
 
             <h3>All Possible Results:</h3>
             <ul id="all-results-list"></ul>

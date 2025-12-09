@@ -36,6 +36,8 @@ document.addEventListener('click', e => {
         const optionsContainer = qBlock.querySelector('.options-container');
         if (optionsContainer.children.length >= 4) return alert("Max 4 options");
 
+        const optionIndex = optionsContainer.children.length; // Get current number of options
+
         const oDiv = document.createElement('div');
         oDiv.classList.add('option-block');
         oDiv.innerHTML = `
@@ -43,7 +45,7 @@ document.addEventListener('click', e => {
             <label>Points</label>
             <input type="number" name="option_points_${idx}[]" placeholder="Points" value="1">
             <label class="correct-label">Correct?
-                <input type="checkbox" name="option_correct_${idx}[]" value="true">
+                <input type="checkbox" name="option_correct_${idx}_${optionIndex}" value="true">
             </label>
             <button type="button" class="delete-option-btn">Delete Option</button>
         `;
@@ -130,7 +132,9 @@ function updateValidation() {
 
     const quizType = document.getElementById('quiz_type').value;
 
-    // Validate Questions
+    // ----------------------------
+    // 1. Validate Questions
+    // ----------------------------
     if (valid && questions.length === 0) {
         valid = false;
         message = "You must add at least one question.";
@@ -166,7 +170,9 @@ function updateValidation() {
         });
     }
 
-    // Validate Result Ranges
+    // ----------------------------
+    // 2. Validate Result Ranges
+    // ----------------------------
     if (valid && results.length === 0) {
         valid = false;
         message = "You must add at least one result range.";
@@ -199,12 +205,15 @@ function updateValidation() {
             ranges.push({ min, max, index: idx + 1 });
         });
 
+        // Sort ranges by minimum value
         ranges.sort((a, b) => a.min - b.min);
 
+        // Check for overlaps
         for (let i = 0; i < ranges.length - 1 && valid; i++) {
             const current = ranges[i];
             const next = ranges[i + 1];
 
+            // Overlap occurs if max > next.min (NOT >=)
             if (current.max > next.min) {
                 valid = false;
                 message = `Result ranges ${current.index} and ${next.index} overlap.`;
@@ -212,7 +221,9 @@ function updateValidation() {
         }
     }
 
-    // Apply Button States
+    // ----------------------------
+    // 3. Apply Button States / Tooltips
+    // ----------------------------
     [saveBtn, publishBtn].forEach(btn => {
         if (!btn) return;
         const tip = btn.querySelector('.tooltiptext');

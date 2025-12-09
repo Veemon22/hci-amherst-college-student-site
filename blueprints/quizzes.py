@@ -88,13 +88,15 @@ def save_questions_and_results(quiz):
 
         option_texts = request.form.getlist(f"option_text_{question_idx}[]")
         option_points = request.form.getlist(f"option_points_{question_idx}[]")
-        option_correct = request.form.getlist(f"option_correct_{question_idx}[]")
 
         for i, text in enumerate(option_texts):
             if not text.strip():
                 continue
-            points = int(option_points[i]) if option_points[i] else 0
-            is_correct = "true" in option_correct[i:i+1]
+            points = int(option_points[i]) if i < len(option_points) and option_points[i] else 0
+    
+            # Check if this specific option's checkbox was checked
+            is_correct = request.form.get(f"option_correct_{question_idx}_{i}") == "true"
+            
             db.session.add(Option(text=text, points=points, is_correct=is_correct, question_id=question.id))
 
         question_idx += 1

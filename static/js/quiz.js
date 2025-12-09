@@ -1,9 +1,11 @@
 let currentQuestion = 1;
 let totalPoints = 0;
+let userAnswers = []; // Track user's answers
 
-// Get quiz ID from body attribute
+// Get quiz ID and type from container
 const quizContainer = document.getElementById('quiz-container');
 const quizId = quizContainer.dataset.quizId;
+const quizType = quizContainer.dataset.quizType;
 
 // Calculate total possible points directly from DOM
 let totalPossiblePoints = 0;
@@ -31,7 +33,34 @@ function showQuestion(index) {
 
 document.querySelectorAll('.option-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        totalPoints += parseInt(btn.dataset.points);
+        const questionBlock = btn.closest('.question-block');
+        const questionIndex = parseInt(questionBlock.dataset.question) - 1;
+        const questionText = questionBlock.dataset.questionText;
+        const selectedAnswer = btn.dataset.optionText;
+        const isCorrect = btn.dataset.isCorrect === 'True';
+        const points = parseInt(btn.dataset.points);
+        
+        // Get all options for this question to find correct answer(S)
+        const allOptions = questionBlock.querySelectorAll('.option-btn');
+        let correctAnswers = [];
+        allOptions.forEach(opt => {
+            if (opt.dataset.isCorrect === 'True') {
+                correctAnswers.push(opt.dataset.optionText);
+            }
+        });
+        
+        // Store user's answer
+        userAnswers.push({
+            questionNumber: questionIndex + 1,
+            questionText: questionText,
+            selectedAnswer: selectedAnswer,
+            correctAnswers: correctAnswers, // Changed from correctAnswer to correctAnswers (array)
+            isCorrect: isCorrect,
+            points: points
+        });
+        
+        totalPoints += points;
+        
         if (currentQuestion < totalQuestions) {
             currentQuestion++;
             showQuestion(currentQuestion);
@@ -77,6 +106,11 @@ function showResult() {
         scoreDisplay.textContent = `You scored ${totalPoints} out of ${totalPossiblePoints}.`;
     }
 
+    // Show review section for objective quizzes
+    if (quizType === 'objective') {
+        showReviewSection();
+    }
+
     // Show all possible result ranges
     const allResultsList = document.getElementById('all-results-list');
     allResultsList.innerHTML = '';
@@ -84,7 +118,7 @@ function showResult() {
         const li = document.createElement('li');
         li.textContent = `${r.dataset.text} (${r.dataset.min}–${r.dataset.max} points)`;
 
-        // Highlight user’s matched result
+        // Highlight user's matched result
         if (matchedResult && r.dataset.text === matchedResult.dataset.text) {
             li.style.fontWeight = 'bold';
             li.style.color = '#5e2a8c';
@@ -105,6 +139,47 @@ function showResult() {
             })
         }).catch(err => console.error("Error submitting result:", err));
     }
+}
+
+function showReviewSection() {
+    const reviewSection = document.getElementById('review-section');
+    const reviewList = document.getElementById('review-list');
+    
+    reviewSection.classList.remove('hidden');
+    reviewList.innerHTML = '';
+    
+    userAnswers.forEach(answer => {
+        const reviewItem = document.createElement('div');
+        reviewItem.className = `review-item ${answer.isCorrect ? 'correct' : 'incorrect'}`;
+        
+        const icon = answer.isCorrect ? '✓' : '✗';
+        const statusClass = answer.isCorrect ? 'status-correct' : 'status-incorrect';
+        
+        // Format correct answers (handle multiple)
+        const correctAnswersText = answer.correctAnswers.length > 1 
+            ? answer.correctAnswers.join(', ') 
+            : answer.correctAnswers[0];
+        
+        reviewItem.innerHTML = `
+            <div class="review-header">
+                <span class="review-number">Question ${answer.questionNumber}</span>
+                <span class="review-status ${statusClass}">${icon} ${answer.isCorrect ? 'Correct' : 'Incorrect'}</span>
+            </div>
+            <div class="review-question">${answer.questionText}</div>
+            <div class="review-answers">
+                <div class="your-answer ${answer.isCorrect ? 'correct-answer' : 'wrong-answer'}">
+                    <strong>Your answer:</strong> ${answer.selectedAnswer}
+                </div>
+                ${!answer.isCorrect ? `
+                    <div class="correct-answer-display">
+                        <strong>Correct answer${answer.correctAnswers.length > 1 ? 's' : ''}:</strong> ${correctAnswersText}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        reviewList.appendChild(reviewItem);
+    });
 }
 
 // Initialize first question
