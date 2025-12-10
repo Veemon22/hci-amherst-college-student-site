@@ -36,6 +36,41 @@ animals = [
     "Lion", "Panda", "Rabbit", "Tiger", "Zebra"
 ]
 
+# ---------- ICS Import ----------
+def import_ics_for_user(user, ics_path):
+    """Imports events from a .ics file for a given user."""
+    if not user or not ics_path or not os.path.exists(ics_path):
+        return 0
+
+    added_count = 0
+    with open(ics_path, 'r') as f:
+        ics_calendar = ICSCalendar(f.read())
+
+    for ics_event in ics_calendar.events:
+        start_dt = ics_event.begin.datetime
+
+        # Skip duplicates
+        exists = Event.query.filter_by(
+            user_id=user.id,
+            title=ics_event.name,
+            date=start_dt
+        ).first()
+        if exists:
+            continue
+
+        new_event = Event(
+            title=ics_event.name or "No Title",
+            description=ics_event.description or "",
+            date=start_dt,
+            user_id=user.id,
+            is_all_day=True,
+        )
+        db.session.add(new_event)
+        added_count += 1
+
+    db.session.commit()
+    return added_count
+
 def initial_data():
     admin_username = os.getenv('ADMIN_USERNAME')
 
@@ -46,6 +81,9 @@ def initial_data():
     admin = User(username=admin_username)
     db.session.add(admin)
     db.session.commit()
+
+    ics_path = os.path.join(app.root_path, 'calendar_info/calendar_25_26.ics')
+    import_ics_for_user(admin, ics_path)
 
     for key, quiz_info in quizzes.items():
         quiz = Quiz(
@@ -149,41 +187,6 @@ def existing_user():
 def signout():
     session.pop('user_id', None)
     return redirect(url_for('signin'))
-
-
-# ---------- ICS Import ----------
-def import_ics_for_user(user, ics_path):
-    """Imports events from a .ics file for a given user."""
-    if not user or not ics_path or not os.path.exists(ics_path):
-        return 0
-
-    added_count = 0
-    with open(ics_path, 'r') as f:
-        ics_calendar = ICSCalendar(f.read())
-
-    for ics_event in ics_calendar.events:
-        start_dt = ics_event.begin.datetime
-
-        # Skip duplicates
-        exists = Event.query.filter_by(
-            user_id=user.id,
-            title=ics_event.name,
-            date=start_dt
-        ).first()
-        if exists:
-            continue
-
-        new_event = Event(
-            title=ics_event.name or "No Title",
-            description=ics_event.description or "",
-            date=start_dt,
-            user_id=user.id
-        )
-        db.session.add(new_event)
-        added_count += 1
-
-    db.session.commit()
-    return added_count
 
 
 # ---------- Protected Pages ----------
